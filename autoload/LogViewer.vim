@@ -55,9 +55,44 @@ function! s:Match( isBackward, targetTimestamp, currentTimestamp )
 	return a:currentTimestamp <= a:targetTimestamp
     endif
 endfunction
+let s:signStartId = 456
+function! s:Sign( lnum, name )
+    execute printf('sign place %i line=%i name=%s buffer=%i',
+    \	s:signStartId + b:logviewer_signCnt,
+    \	a:lnum,
+    \	a:name,
+    \	bufnr('')
+    \)
+    let b:logviewer_signCnt += 1
+endfunction
+function! s:SignClear()
+    if ! exists('b:logviewer_signCnt') | let b:logviewer_signCnt = 0 | endif
+
+    for l:signId in range(s:signStartId, s:signStartId + b:logviewer_signCnt - 1)
+	execute printf('sign unplace %i buffer=%i', l:signId, bufnr(''))
+    endfor
+endfunction
+function! s:Mark( fromLnum, toLnum )
+    echomsg '****' bufname('') 'move from' a:fromLnum 'to' a:toLnum
+
+    " Move cursor position
+    execute a:toLnum
+
+    let l:isDown = (a:toLnum > a:fromLnum)
+    call s:SignClear()
+
+    call s:Sign(a:toLnum, 'logviewerCurrent' . (l:isDown ? 'Down' : 'Up'))
+
+    let l:lnum = a:toLnum + (l:isDown ? -1 : 1)
+    while l:lnum != a:fromLnum
+	call s:Sign(l:lnum, 'logviewerRange')
+	let l:lnum += (l:isDown ? -1 : 1)
+    endwhile
+endfunction
 function! s:JumpToTimestamp( timestamp, isBackward )
+    let l:originalLnum = line('.')
     " The current timestamp is either on the current line or above it. 
-    let [l:lnum, l:currentTimestamp] = s:GetNextTimestamp(line('.') + 1, -1)
+    let [l:lnum, l:currentTimestamp] = s:GetNextTimestamp(l:originalLnum + 1, -1)
 
     let l:offset = (a:isBackward ? -1 : 1) * (s:Match(a:isBackward, a:timestamp, l:currentTimestamp) ? 1 : -1)
 
@@ -72,10 +107,8 @@ function! s:JumpToTimestamp( timestamp, isBackward )
 	let l:updatedLnum = l:lnum
     endwhile
 
-    if l:updatedLnum > 0 && l:updatedLnum != line('.')
-	let w:persistent_cursorline = 1
-	echomsg '****' bufname('') 'move from' line('.') 'to' l:updatedLnum
-	execute l:updatedLnum
+    if l:updatedLnum > 0 && l:updatedLnum != l:originalLnum
+	call s:Mark(l:originalLnum, l:updatedLnum)
     endif
 endfunction
 
