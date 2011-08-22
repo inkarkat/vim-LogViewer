@@ -1,5 +1,13 @@
 " logviewer.vim: summary
 "
+" IDEAS:
+"   - Disable range highlighting via config setting. 
+"   - Trigger marking in other buffers only on demand (instead of autocmd), and
+"     only when in the source buffer. 
+"   - Commands to (un-)freeze the marks. 
+"   - Compare and mark current lines that are identical in all logs. Keep those
+"     lines so that a full picture emerges when moving along. 
+"   
 " DEPENDENCIES:
 "
 " Copyright: (C) 2011 Ingo Karkat
@@ -24,5 +32,9 @@ augroup logviewer
     autocmd!
     execute 'autocmd FileType' g:logviewer_filetypes 'call logviewer#InstallLogLineSync()'
 augroup END
+
+sign define logviewerCurrentUp   text=^ linehl=DiffText
+sign define logviewerCurrentDown text=V linehl=DiffText
+sign define logviewerRange       text=| linehl=DiffChange
 
 " vim: set sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
