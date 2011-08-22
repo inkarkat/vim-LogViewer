@@ -80,22 +80,23 @@ function! s:Mark( fromLnum, toLnum )
     " Move cursor to the final log entry. 
     execute a:toLnum
 
-    " Mark all log entries that fall within the time range of the move to the
-    " target timestamp. 
+    " Mark the borders of the range of log entries that fall within the time
+    " range of the move to the target timestamp. 
+
+    " Signs aren't displayed in closed folds, so need to open them. 
+    for l:lnum in [a:fromLnum, a:toLnum]
+	if foldclosed(l:lnum) != -1
+	    execute l:lnum . 'foldopen'
+	endif
+    endfor
+
     let l:isDown = (a:toLnum > a:fromLnum)
     call s:DummySign(1)
     call s:SignClear()
-
-    " Mark the final log entry in a special way. 
     call s:Sign(a:toLnum, 'logviewerCurrent' . (l:isDown ? 'Down' : 'Up'))
-
-    " Mark all other log entries, moving from the final log entry (so that
-    " eventually, the sings are placed outside the visible window). 
-    let l:lnum = a:toLnum + (l:isDown ? -1 : 1)
-    while l:lnum != a:fromLnum
-	call s:Sign(l:lnum, 'logviewerRange')
-	let l:lnum += (l:isDown ? -1 : 1)
-    endwhile
+    if a:fromLnum != a:toLnum
+	call s:Sign(a:fromLnum, 'logviewerFrom'. (l:isDown ? 'Down' : 'Up'))
+    endif
     call s:DummySign(0)
 endfunction
 function! s:JumpToTimestamp( timestamp, isBackward )
