@@ -1,21 +1,7 @@
 " logviewer.vim: summary
 "
-" DESCRIPTION:
-" USAGE:
-" INSTALLATION:
-"   Put the script into your user or system Vim plugin directory (e.g.
-"   ~/.vim/plugin). 
-
 " DEPENDENCIES:
-"   - Requires Vim 7.0 or higher. 
 
-" CONFIGURATION:
-" INTEGRATION:
-" LIMITATIONS:
-" ASSUMPTIONS:
-" KNOWN PROBLEMS:
-" TODO:
-"
 " Copyright: (C) 2011 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'. 
 "
@@ -56,6 +42,20 @@ function! s:Match( isBackward, targetTimestamp, currentTimestamp )
     endif
 endfunction
 let s:signStartId = 456
+function! s:DummySign( isOn )
+    " To avoid flickering of the sign column when all signs are temporarily
+    " removed. 
+    if a:isOn
+	sign define dummy text=.
+	execute printf('sign place %i line=1 name=dummy buffer=%i',
+	\   s:signStartId -1,
+	\   bufnr('')
+	\)
+    else
+	execute printf('sign unplace %i buffer=%i', s:signStartId - 1, bufnr(''))
+	sign undefine dummy
+    endif
+endfunction
 function! s:Sign( lnum, name )
     execute printf('sign place %i line=%i name=%s buffer=%i',
     \	s:signStartId + b:logviewer_signCnt,
@@ -71,23 +71,32 @@ function! s:SignClear()
     for l:signId in range(s:signStartId, s:signStartId + b:logviewer_signCnt - 1)
 	execute printf('sign unplace %i buffer=%i', l:signId, bufnr(''))
     endfor
+
+    let b:logviewer_signCnt = 0
 endfunction
 function! s:Mark( fromLnum, toLnum )
-    echomsg '****' bufname('') 'move from' a:fromLnum 'to' a:toLnum
+    echo bufname('') 'move from' a:fromLnum 'to' a:toLnum
 
-    " Move cursor position
+    " Move cursor to the final log entry. 
     execute a:toLnum
 
+    " Mark all log entries that fall within the time range of the move to the
+    " target timestamp. 
     let l:isDown = (a:toLnum > a:fromLnum)
+    call s:DummySign(1)
     call s:SignClear()
 
+    " Mark the final log entry in a special way. 
     call s:Sign(a:toLnum, 'logviewerCurrent' . (l:isDown ? 'Down' : 'Up'))
 
+    " Mark all other log entries, moving from the final log entry (so that
+    " eventually, the sings are placed outside the visible window). 
     let l:lnum = a:toLnum + (l:isDown ? -1 : 1)
     while l:lnum != a:fromLnum
 	call s:Sign(l:lnum, 'logviewerRange')
 	let l:lnum += (l:isDown ? -1 : 1)
     endwhile
+    call s:DummySign(0)
 endfunction
 function! s:JumpToTimestamp( timestamp, isBackward )
     let l:originalLnum = line('.')
@@ -99,7 +108,7 @@ function! s:JumpToTimestamp( timestamp, isBackward )
     let l:updatedLnum = 0
     while 1
 	let [l:lnum, l:nextTimestamp] = s:GetNextTimestamp(l:lnum, l:offset)
-	echomsg '****' l:lnum l:nextTimestamp
+"****D echomsg '****' l:lnum l:nextTimestamp
 	if empty(l:nextTimestamp) || ! s:Match(a:isBackward, a:timestamp, l:nextTimestamp)
 	    break
 	endif
@@ -167,6 +176,7 @@ function! logviewer#InstallLogLineSync()
     augroup logviewerSync
 	autocmd! * <buffer>
 	autocmd CursorMoved,CursorHold <buffer> call logviewer#LineSync()
+	autocmd WinEnter <buffer> call <SID>SignClear()
     augroup END
 endfunction
 function! s:DeinstallLogLineSync()
