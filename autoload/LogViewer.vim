@@ -48,7 +48,7 @@ function! s:GetNextTimestamp( startLnum, offset )
     endwhile
     return [0, '']
 endfunction
-function! s:Match( isBackward, offset, targetTimestamp, currentTimestamp )
+function! s:Match( isBackward, targetTimestamp, currentTimestamp )
     if a:isBackward
 	return a:currentTimestamp >= a:targetTimestamp
     else
@@ -56,37 +56,16 @@ function! s:Match( isBackward, offset, targetTimestamp, currentTimestamp )
     endif
 endfunction
 function! s:JumpToTimestamp( timestamp, isBackward )
-    let l:offset = (a:isBackward ? -1 : 1)
+    " The current timestamp is either on the current line or above it. 
+    let [l:lnum, l:currentTimestamp] = s:GetNextTimestamp(line('.') + 1, -1)
 
-    " Try to get the next timestamp in the opposite direction. 
-    let [l:lnum, l:nearestTimestamp] = s:GetNextTimestamp(line('.'), -1 * l:offset)
-    if l:lnum == 0
-	" No timestamp; try the other direction. 
-	let l:offset = -1 * l:offset
-	let [l:lnum, l:nearestTimestamp] = s:GetNextTimestamp(line('.'), l:offset)
-    endif
-    if l:lnum == 0
-	" No timestamp at all, give up. 
-	return
-    endif
+    let l:offset = (a:isBackward ? -1 : 1) * (s:Match(a:isBackward, a:timestamp, l:currentTimestamp) ? 1 : -1)
 
-    if a:isBackward
-	if l:offset > 0
-	    let l:offset = (l:nearestTimestamp >= a:timestamp ? -1 : 1)
-	elseif l:nearestTimestamp <= a:timestamp
-	    let l:offset = 1
-	else
-	    return
-	endif
-    endif
-
-
-    echomsg '**** start'
     let l:updatedLnum = 0
     while 1
 	let [l:lnum, l:nextTimestamp] = s:GetNextTimestamp(l:lnum, l:offset)
 	echomsg '****' l:lnum l:nextTimestamp
-	if empty(l:nextTimestamp) || ! s:Match(a:isBackward, l:offset, a:timestamp, l:nextTimestamp)
+	if empty(l:nextTimestamp) || ! s:Match(a:isBackward, a:timestamp, l:nextTimestamp)
 	    break
 	endif
 
