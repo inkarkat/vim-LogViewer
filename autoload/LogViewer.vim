@@ -79,19 +79,6 @@ function! s:JumpToTimestamp( timestamp, isBackward )
     endif
 endfunction
 
-function! s:Jump( timestamp, isBackward, originalWinNr, bufNrs)
-    echomsg '#### ' winnr() a:originalWinNr s:IsLogBuffer() bufnr('') string(a:bufNrs) index(a:bufNrs, bufnr(''))
-    if (
-    \	winnr() != a:originalWinNr &&
-    \	s:IsLogBuffer() &&
-    \	index(a:bufNrs, bufnr('')) == -1
-    \)
-	call s:JumpToTimestamp(a:timestamp, a:isBackward) |
-	call add(a:bufNrs, bufnr('')) |
-    else
-	execute "echomsg '#### skipping' bufnr('')" 
-    endif
-endfunction
 function! s:SyncToTimestamp( timestamp, isBackward )
     " Sync every buffer only once when it appears in multiple windows, to avoid
     " a 'scrollbind'-like effect and allow for research in multiple parts of the
@@ -101,7 +88,15 @@ function! s:SyncToTimestamp( timestamp, isBackward )
     let l:originalWindowLayout = winrestcmd()
 	let l:originalWinNr = winnr()
 
-	    noautocmd windo call s:Jump(a:timestamp, a:isBackward, l:originalWinNr, l:syncedBufNrs)
+	    noautocmd windo
+	    \	if (
+	    \	    winnr() != l:originalWinNr &&
+	    \	    s:IsLogBuffer() &&
+	    \	    index(l:syncedBufNrs, bufnr('')) == -1
+	    \	) |
+	    \	    call s:JumpToTimestamp(a:timestamp, a:isBackward) |
+	    \	    call add(l:syncedBufNrs, bufnr('')) |
+	    \	endif
 
 	execute 'noautocmd' l:originalWinNr . 'wincmd w'
     silent! execute l:originalWindowLayout
