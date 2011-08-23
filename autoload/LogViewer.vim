@@ -46,14 +46,12 @@ function! s:DummySign( isOn )
     " To avoid flickering of the sign column when all signs are temporarily
     " removed. 
     if a:isOn
-	sign define dummy text=.
-	execute printf('sign place %i line=1 name=dummy buffer=%i',
+	execute printf('sign place %i line=1 name=logviewerDummy buffer=%i',
 	\   s:signStartId -1,
 	\   bufnr('')
 	\)
     else
 	execute printf('sign unplace %i buffer=%i', s:signStartId - 1, bufnr(''))
-	sign undefine dummy
     endif
 endfunction
 function! s:Sign( lnum, name )
@@ -73,6 +71,12 @@ function! s:SignClear()
     endfor
 
     let b:logviewer_signCnt = 0
+endfunction
+function! s:MarkTarget()
+    call s:DummySign(1)
+    call s:SignClear()
+    call s:Sign(line('.'), 'logviewerTarget')
+    call s:DummySign(0)
 endfunction
 function! s:Mark( fromLnum, toLnum )
     " Move cursor to the final log entry. 
@@ -124,6 +128,8 @@ function! s:JumpToTimestamp( timestamp, isBackward )
 endfunction
 
 function! s:SyncToTimestamp( timestamp, isBackward )
+    call s:MarkTarget()
+
     " Sync every buffer only once when it appears in multiple windows, to avoid
     " a 'scrollbind'-like effect and allow for research in multiple parts of the
     " same buffer. 
@@ -178,7 +184,7 @@ function! logviewer#InstallLogLineSync()
     augroup logviewerSync
 	autocmd! * <buffer>
 	autocmd CursorMoved,CursorHold <buffer> call logviewer#LineSync()
-	autocmd WinEnter <buffer> call <SID>SignClear()
+	autocmd WinLeave <buffer> call <SID>SignClear()
     augroup END
 endfunction
 function! s:DeinstallLogLineSync()
