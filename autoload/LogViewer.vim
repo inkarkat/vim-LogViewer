@@ -75,8 +75,6 @@ function! s:SignClear()
     let b:logviewer_signCnt = 0
 endfunction
 function! s:Mark( fromLnum, toLnum )
-    echo bufname('') 'move from' a:fromLnum 'to' a:toLnum
-
     " Move cursor to the final log entry. 
     execute a:toLnum
 
@@ -93,8 +91,10 @@ function! s:Mark( fromLnum, toLnum )
     let l:isDown = (a:toLnum > a:fromLnum)
     call s:DummySign(1)
     call s:SignClear()
-    call s:Sign(a:toLnum, 'logviewerCurrent' . (l:isDown ? 'Down' : 'Up'))
-    if a:fromLnum != a:toLnum
+    if a:fromLnum == a:toLnum
+	call s:Sign(a:toLnum, 'logviewerNew' . (l:isDown ? 'Down' : 'Up'))
+    else
+	call s:Sign(a:toLnum, 'logviewerCurrent' . (l:isDown ? 'Down' : 'Up'))
 	call s:Sign(a:fromLnum, 'logviewerFrom'. (l:isDown ? 'Down' : 'Up'))
     endif
     call s:DummySign(0)
@@ -118,7 +118,8 @@ function! s:JumpToTimestamp( timestamp, isBackward )
     endwhile
 
     if l:updatedLnum > 0 && l:updatedLnum != l:originalLnum
-	call s:Mark(l:originalLnum, l:updatedLnum)
+	echo bufname('') 'move from' l:originalLnum 'to' l:updatedLnum
+	call s:Mark(l:originalLnum + 1, l:updatedLnum)
     endif
 endfunction
 
