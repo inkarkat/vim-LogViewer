@@ -33,11 +33,13 @@ augroup logviewer
     execute 'autocmd FileType' g:logviewer_filetypes 'call logviewer#InstallLogLineSync()'
 augroup END
 
+sign define logviewerDummy       text=.
 sign define logviewerNewUp       text=> linehl=DiffText
 sign define logviewerNewDown     text=> linehl=DiffText
 sign define logviewerCurrentUp   text=^ linehl=DiffText
 sign define logviewerCurrentDown text=V linehl=DiffText
 sign define logviewerFromUp      text=- linehl=DiffText
 sign define logviewerFromDown    text=- linehl=DiffText
+sign define logviewerTarget      text=T linehl=DiffText
 
 " vim: set sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
