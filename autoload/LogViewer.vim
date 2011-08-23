@@ -122,9 +122,14 @@ function! s:JumpToTimestamp( timestamp, isBackward )
     endwhile
 
     if l:updatedLnum > 0 && l:updatedLnum != l:originalLnum
+	let b:logviewer_fromLnum = l:originalLnum + 1
+	let b:logviewer_toLnum = l:updatedLnum
+
 	echo bufname('') 'move from' l:originalLnum 'to' l:updatedLnum
-	call s:Mark(l:originalLnum + 1, l:updatedLnum)
     endif
+
+    " Always update the marks; the target may have changed by switching windows. 
+    call s:Mark(b:logviewer_fromLnum, b:logviewer_toLnum)
 endfunction
 
 function! s:SyncToTimestamp( timestamp, isBackward )
@@ -175,6 +180,16 @@ function! logviewer#LineSync()
     endif
 endfunction
 
+function! logviewer#TargetEnter()
+    " Clear away any range signs from a synced buffer, and mark the new target
+    " line. 
+    call s:MarkTarget()
+endfunction
+function! logviewer#TargetLeave()
+    " Restore this as a synced buffer from the persisted data. 
+    call s:Mark(b:logviewer_fromLnum, b:logviewer_toLnum)
+endfunction
+
 function! logviewer#InstallLogLineSync()
     " Sync the current log line via the timestamp to the cursor positions in all
     " other open log windows. Do this now and update when the cursor isn't
@@ -184,7 +199,8 @@ function! logviewer#InstallLogLineSync()
     augroup logviewerSync
 	autocmd! * <buffer>
 	autocmd CursorMoved,CursorHold <buffer> call logviewer#LineSync()
-	autocmd WinLeave <buffer> call <SID>SignClear()
+	autocmd WinEnter <buffer> call logviewer#TargetEnter()
+	autocmd WinLeave <buffer> call logviewer#TargetLeave()
     augroup END
 endfunction
 function! s:DeinstallLogLineSync()
