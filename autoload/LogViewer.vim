@@ -1,4 +1,4 @@
-" logviewer.vim: summary
+" logviewer.vim: Comfortable examination of multiple parallel logfiles. 
 "
 " DEPENDENCIES:
 
@@ -8,6 +8,10 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	002	24-Aug-2011	Implement marking of target line in master
+"				buffer, correct updating when moving across
+"				windows, auto-sync and manual setting of a
+"				master buffer. 
 "	001	23-Aug-2011	file creation
 
 let s:save_cpo = &cpo
@@ -92,18 +96,23 @@ function! s:Mark( fromLnum, toLnum )
 	endif
     endfor
 
-    let l:isDown = (a:toLnum > a:fromLnum)
+    let l:suffix = (a:toLnum > a:fromLnum ? 'Down' : 'Up')
     call s:DummySign(1)
     call s:SignClear()
     if a:fromLnum == a:toLnum
-	call s:Sign(a:toLnum, 'logviewerNew' . (l:isDown ? 'Down' : 'Up'))
+	call s:Sign(a:toLnum, 'logviewerNew'   . l:suffix)
     else
-	call s:Sign(a:toLnum, 'logviewerCurrent' . (l:isDown ? 'Down' : 'Up'))
-	call s:Sign(a:fromLnum, 'logviewerFrom'. (l:isDown ? 'Down' : 'Up'))
+	call s:Sign(a:toLnum, 'logviewerTo'    . l:suffix)
+	call s:Sign(a:fromLnum, 'logviewerFrom'. l:suffix)
     endif
     call s:DummySign(0)
 endfunction
-function! s:JumpToTimestamp( timestamp, isBackward )
+function! s:MarkBuffer()
+    if exists('b:logviewer_fromLnum') && exists('b:logviewer_toLnum')
+	call s:Mark(b:logviewer_fromLnum, b:logviewer_toLnum)
+    endif
+endfunction
+function! s:AdvanceToTimestamp( timestamp, isBackward )
     let l:originalLnum = line('.')
     " The current timestamp is either on the current line or above it. 
     let [l:lnum, l:currentTimestamp] = s:GetNextTimestamp(l:originalLnum + 1, -1)
@@ -129,7 +138,7 @@ function! s:JumpToTimestamp( timestamp, isBackward )
     endif
 
     " Always update the marks; the target may have changed by switching windows. 
-    call s:Mark(b:logviewer_fromLnum, b:logviewer_toLnum)
+    call s:MarkBuffer()
 endfunction
 
 function! s:SyncToTimestamp( timestamp, isBackward )
@@ -149,7 +158,7 @@ function! s:SyncToTimestamp( timestamp, isBackward )
 	    \	    s:IsLogBuffer() &&
 	    \	    index(l:syncedBufNrs, bufnr('')) == -1
 	    \	) |
-	    \	    call s:JumpToTimestamp(a:timestamp, a:isBackward) |
+	    \	    call s:AdvanceToTimestamp(a:timestamp, a:isBackward) |
 	    \	    call add(l:syncedBufNrs, bufnr('')) |
 	    \	endif
 
@@ -157,7 +166,11 @@ function! s:SyncToTimestamp( timestamp, isBackward )
     silent! execute l:originalWindowLayout
 endfunction
 
-function! logviewer#LineSync()
+function! logviewer#LineSync( syncEvent )
+    if ! empty(a:syncEvent) && a:syncEvent !=# g:logviewer_syncUpdate
+	return
+    endif
+
     if ! s:IsLogBuffer()
 	" The filetype must have changed to a non-logfile. 
 	call s:DeinstallLogLineSync()
@@ -180,31 +193,147 @@ function! logviewer#LineSync()
     endif
 endfunction
 
-function! logviewer#TargetEnter()
+function! s:ExprMatch( timestamp, timestampExpr )
+    if a:timestamp =~# '^\d\+$'
+	" Use numerical compare for integer timestamps. 
+	return (str2nr(a:timestamp) <= str2nr(a:timestampExpr))
+    else
+	return a:timestamp <=# a:timestampExpr
+    endif
+endfunction
+function! s:FindTimestamp( timestampExpr )
+    " First search from the current cursor position to the end of the buffer,
+    " then wrap around. 
+    for [l:lnum, l:stopLnum] in [[line('.'), line('$')], [1, line('.')]]
+	while 1
+	    let [l:lnum, l:nextTimestamp] = s:GetNextTimestamp(l:lnum, 1)
+	    if empty(l:nextTimestamp)
+		break
+	    elseif ! s:ExprMatch(l:nextTimestamp, a:timestampExpr)
+		return l:lnum
+	    elseif l:lnum >= l:stopLnum
+		break
+	    endif
+	endwhile
+    endfor
+
+    return -1
+endfunction
+function! s:JumpToTimestampOffset( startLnum, offset )
+    let l:lnum = a:startLnum
+    for l:i in range(a:offset)
+	let [l:newLnum, l:nextTimestamp] = s:GetNextTimestamp(l:lnum, 1)
+	if empty(l:nextTimestamp)
+	    break
+	endif
+	let l:lnum = l:newLnum
+    endfor
+
+    execute l:lnum
+endfunction
+function! logviewer#SetTarget( timestampOffset, targetSpec )
+    if ! s:IsLogBuffer()
+	let v:errmsg = 'Not in log buffer'
+	echohl ErrorMsg
+	echomsg v:errmsg
+	echohl None
+
+	return
+    endif
+
+    if ! empty(a:targetSpec)
+	" Search for a timestamp matching the passed target specification. 
+	let l:lnum = s:FindTimestamp(a:targetSpec)
+	if l:lnum == -1
+	    let v:errmsg = 'No timestamp matching "' . a:targetSpec . '" found'
+	    echohl ErrorMsg
+	    echomsg v:errmsg
+	    echohl None
+
+	    return
+	endif
+
+	if a:timestampOffset != 0
+	    " Apply the offset to the matched position. 
+	    call s:JumpToTimestampOffset(l:lnum, a:timestampOffset)
+	else
+	    execute l:lnum
+	endif
+    else
+	if a:timestampOffset != 0
+	    call s:JumpToTimestampOffset(
+	    \   (exists('b:logviewer_prevline') ? b:logviewer_prevline : line('.')),
+	    \   a:timestampOffset
+	    \)
+	endif
+    endif
+
+    call logviewer#LineSync('')
+endfunction
+
+function! logviewer#MasterEnter()
     " Clear away any range signs from a synced buffer, and mark the new target
     " line. 
     call s:MarkTarget()
 endfunction
-function! logviewer#TargetLeave()
+function! logviewer#MasterLeave()
     " Restore this as a synced buffer from the persisted data. 
-    call s:Mark(b:logviewer_fromLnum, b:logviewer_toLnum)
+    call s:MarkBuffer()
 endfunction
 
+let s:masterBufnr = -1
+function! s:IsMaster()
+    return (s:masterBufnr == -1 || bufnr('') == s:masterBufnr)
+endfunction
+function! s:HasFixedMaster()
+    return (s:masterBufnr != -1)
+endfunction
 function! logviewer#InstallLogLineSync()
     " Sync the current log line via the timestamp to the cursor positions in all
     " other open log windows. Do this now and update when the cursor isn't
     " moved. 
-    call logviewer#LineSync()
+    call logviewer#LineSync('')
 
     augroup logviewerSync
 	autocmd! * <buffer>
-	autocmd CursorMoved,CursorHold <buffer> call logviewer#LineSync()
-	autocmd WinEnter <buffer> call logviewer#TargetEnter()
-	autocmd WinLeave <buffer> call logviewer#TargetLeave()
+
+	" To allow dynamic changing of the sync update (without having to
+	" re-apply the changed autocmds to all individual log buffers), we
+	" always register for all events, and ignore non-matches inside the
+	" event handler. 
+	autocmd CursorMoved <buffer> if <SID>IsMaster() | call logviewer#LineSync('CursorMoved') | endif
+	autocmd CursorHold  <buffer> if <SID>IsMaster() | call logviewer#LineSync('CursorHold')  | endif
+
+	" Handle change of master buffer containing the target timestamp. 
+	autocmd WinEnter <buffer> if ! <SID>HasFixedMaster() | call logviewer#MasterEnter() | endif
+	autocmd WinLeave <buffer> if ! <SID>HasFixedMaster() | call logviewer#MasterLeave() | endif
     augroup END
 endfunction
 function! s:DeinstallLogLineSync()
     autocmd! logviewerSync * <buffer>
+endfunction
+
+function! logviewer#Master()
+    call logviewer#LineSync('')
+
+    if g:logviewer_syncAll
+	" Set the master buffer and ignore non-matches inside the event
+	" handlers. 
+	let s:masterBufnr = bufnr('')
+    else
+	" Create the autocmds just for this master buffer. 
+	augroup logviewerSync
+	    " Delete all autocmds, either from a previous master buffer, or from
+	    " all log buffers via the auto-sync. 
+	    autocmd!
+
+	    autocmd CursorMoved <buffer> call logviewer#LineSync('CursorMoved')
+	    autocmd CursorHold  <buffer> call logviewer#LineSync('CursorHold')
+
+	    " The master buffer containing the target timestamp is fixed, no
+	    " need to adapt when jumping around windows. 
+	augroup END
+    endif
 endfunction
 
 let &cpo = s:save_cpo
