@@ -56,6 +56,10 @@ function! s:SyncUpdateComplete( ArgLead, CmdLine, CursorPos )
 endfunction
 command! -bar -nargs=1 -complete=customlist,<SID>SyncUpdateComplete LogViewerUpdate call <SID>SetSyncUpdate(<q-args>)
 
+" Set target to current line, [count] timestamps down (from the current target
+" timestamp), or the first timestamp that matches {timestamp}. 
+command! -bar -range=0 -nargs=? LogViewerTarget call logviewer#SetTarget(<count>, <q-args>)
+
 
 "- autocmds --------------------------------------------------------------------
 if g:logviewer_syncAll
