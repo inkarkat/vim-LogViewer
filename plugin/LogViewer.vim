@@ -86,4 +86,4 @@ sign define logviewerFromUp   text=- texthl=logviewerFrom   linehl=logviewerFrom
 sign define logviewerFromDown text=- texthl=logviewerFrom   linehl=logviewerFrom
 sign define logviewerTarget   text=T texthl=logviewerTarget linehl=logviewerTarget
 
-" vim: set sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
+" vim: set ts=8 sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
