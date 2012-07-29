@@ -1,0 +1,86 @@
+*logviewer.txt*         Comfortable examination of multiple parallel logfiles.
+
+			 LOGVIEWER    by Ingo Karkat
+							       *logviewer.vim*
+description			|logviewer-description|
+usage				|logviewer-usage|
+installation			|logviewer-installation|
+configuration			|logviewer-configuration|
+integration			|logviewer-integration|
+limitations			|logviewer-limitations|
+known problems			|logviewer-known-problems|
+todo				|logviewer-todo|
+history				|logviewer-history|
+
+==============================================================================
+DESCRIPTION					       *logviewer-description*
+
+This plugin ...
+
+HOW IT WORKS								     *
+
+SEE ALSO								     *
+
+RELATED WORKS								     *
+
+==============================================================================
+USAGE							     *logviewer-usage*
+								 *<Leader>Foo*
+<Leader>Foo		Description here.
+							  *:logviewer*
+:logviewer	Description here.
+
+EXAMPLE							   *logviewer-example*
+
+==============================================================================
+INSTALLATION					      *logviewer-installation*
+
+This script is packaged as a |vimball|. If you have the "gunzip" decompressor
+in your PATH, simply edit the *.vba.gz package in Vim; otherwise, decompress
+the archive first, e.g. using WinZip. Inside Vim, install by sourcing the
+vimball or via the |:UseVimball| command. >
+    vim logviewer.vba.gz
+    :so %
+To uninstall, use the |:RmVimball| command.
+
+DEPENDENCIES					      *logviewer-dependencies*
+
+- Requires Vim 7.0 or higher.
+
+==============================================================================
+CONFIGURATION					     *logviewer-configuration*
+
+For a permanent configuration, put the following commands into your |vimrc|:
+
+						*g:logviewer_MyOption*
+To change the default TODO from FOO to BAR, use: >
+    let g:logviewer_MyOption = 'BAR'
+<
+==============================================================================
+INTEGRATION					       *logviewer-integration*
+
+==============================================================================
+LIMITATIONS					       *logviewer-limitations*
+
+KNOWN PROBLEMS					    *logviewer-known-problems*
+
+TODO							      *logviewer-todo*
+
+IDEAS							     *logviewer-ideas*
+
+==============================================================================
+HISTORY							   *logviewer-history*
+
+GOAL
+First published version.
+
+0.01	23-Aug-2011
+Started development.
+
+==============================================================================
+Copyright: (C) 2011-2012 Ingo Karkat
+The VIM LICENSE applies to this script; see |copyright|.
+
+Maintainer:	Ingo Karkat <ingo@karkat.de>
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:
