@@ -1,17 +1,19 @@
-" logviewer.vim: Comfortable examination of multiple parallel logfiles. 
+" logviewer.vim: Comfortable examination of multiple parallel logfiles.
 "
 " DEPENDENCIES:
 
 " Copyright: (C) 2011 Ingo Karkat
-"   The VIM LICENSE applies to this script; see ':help copyright'. 
+"   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
-" REVISION	DATE		REMARKS 
+" REVISION	DATE		REMARKS
+"	003	24-Jul-2012	Allow customization of the window where log
+"				lines are synced via User autocmd.
 "	002	24-Aug-2011	Implement marking of target line in master
 "				buffer, correct updating when moving across
 "				windows, auto-sync and manual setting of a
-"				master buffer. 
+"				master buffer.
 "	001	23-Aug-2011	file creation
 
 let s:save_cpo = &cpo
@@ -48,7 +50,7 @@ endfunction
 let s:signStartId = 456
 function! s:DummySign( isOn )
     " To avoid flickering of the sign column when all signs are temporarily
-    " removed. 
+    " removed.
     if a:isOn
 	execute printf('sign place %i line=1 name=logviewerDummy buffer=%i',
 	\   s:signStartId -1,
@@ -83,13 +85,13 @@ function! s:MarkTarget()
     call s:DummySign(0)
 endfunction
 function! s:Mark( fromLnum, toLnum )
-    " Move cursor to the final log entry. 
+    " Move cursor to the final log entry.
     execute a:toLnum
 
     " Mark the borders of the range of log entries that fall within the time
-    " range of the move to the target timestamp. 
+    " range of the move to the target timestamp.
 
-    " Signs aren't displayed in closed folds, so need to open them. 
+    " Signs aren't displayed in closed folds, so need to open them.
     for l:lnum in [a:fromLnum, a:toLnum]
 	if foldclosed(l:lnum) != -1
 	    execute l:lnum . 'foldopen'
@@ -114,7 +116,7 @@ function! s:MarkBuffer()
 endfunction
 function! s:AdvanceToTimestamp( timestamp, isBackward )
     let l:originalLnum = line('.')
-    " The current timestamp is either on the current line or above it. 
+    " The current timestamp is either on the current line or above it.
     let [l:lnum, l:currentTimestamp] = s:GetNextTimestamp(l:originalLnum + 1, -1)
 
     let l:offset = (a:isBackward ? -1 : 1) * (s:Match(a:isBackward, a:timestamp, l:currentTimestamp) ? 1 : -1)
@@ -137,16 +139,23 @@ function! s:AdvanceToTimestamp( timestamp, isBackward )
 	echo bufname('') 'move from' l:originalLnum 'to' l:updatedLnum
     endif
 
-    " Always update the marks; the target may have changed by switching windows. 
+    " Always update the marks; the target may have changed by switching windows.
     call s:MarkBuffer()
 endfunction
 
+function! s:OnSyncWin()
+    " Allow customization of the window where log lines are synced.
+    " For example, when the sign highlights the entire line, the 'cursorline'
+    " setting should be turned off.
+    silent doautocmd User LogviewerSyncWin
+endfunction
 function! s:SyncToTimestamp( timestamp, isBackward )
     call s:MarkTarget()
+    call s:OnSyncWin()
 
     " Sync every buffer only once when it appears in multiple windows, to avoid
     " a 'scrollbind'-like effect and allow for research in multiple parts of the
-    " same buffer. 
+    " same buffer.
     let l:syncedBufNrs = [bufnr('')]
 
     let l:originalWindowLayout = winrestcmd()
@@ -160,6 +169,7 @@ function! s:SyncToTimestamp( timestamp, isBackward )
 	    \	) |
 	    \	    call s:AdvanceToTimestamp(a:timestamp, a:isBackward) |
 	    \	    call add(l:syncedBufNrs, bufnr('')) |
+	    \       call s:OnSyncWin() |
 	    \	endif
 
 	execute 'noautocmd' l:originalWinNr . 'wincmd w'
@@ -172,7 +182,7 @@ function! logviewer#LineSync( syncEvent )
     endif
 
     if ! s:IsLogBuffer()
-	" The filetype must have changed to a non-logfile. 
+	" The filetype must have changed to a non-logfile.
 	call s:DeinstallLogLineSync()
 	return
     endif
@@ -180,7 +190,7 @@ function! logviewer#LineSync( syncEvent )
     let l:isBackward = 0
     if exists('b:logviewer_prevline')
 	if b:logviewer_prevline == line('.')
-	    " Only horizontal cursor movement within the same line, skip processing. 
+	    " Only horizontal cursor movement within the same line, skip processing.
 	    return
 	endif
 	let l:isBackward = (b:logviewer_prevline > line('.'))
@@ -195,7 +205,7 @@ endfunction
 
 function! s:ExprMatch( timestamp, timestampExpr )
     if a:timestamp =~# '^\d\+$'
-	" Use numerical compare for integer timestamps. 
+	" Use numerical compare for integer timestamps.
 	return (str2nr(a:timestamp) <= str2nr(a:timestampExpr))
     else
 	return a:timestamp <=# a:timestampExpr
@@ -203,7 +213,7 @@ function! s:ExprMatch( timestamp, timestampExpr )
 endfunction
 function! s:FindTimestamp( timestampExpr )
     " First search from the current cursor position to the end of the buffer,
-    " then wrap around. 
+    " then wrap around.
     for [l:lnum, l:stopLnum] in [[line('.'), line('$')], [1, line('.')]]
 	while 1
 	    let [l:lnum, l:nextTimestamp] = s:GetNextTimestamp(l:lnum, 1)
@@ -242,7 +252,7 @@ function! logviewer#SetTarget( timestampOffset, targetSpec )
     endif
 
     if ! empty(a:targetSpec)
-	" Search for a timestamp matching the passed target specification. 
+	" Search for a timestamp matching the passed target specification.
 	let l:lnum = s:FindTimestamp(a:targetSpec)
 	if l:lnum == -1
 	    let v:errmsg = 'No timestamp matching "' . a:targetSpec . '" found'
@@ -254,7 +264,7 @@ function! logviewer#SetTarget( timestampOffset, targetSpec )
 	endif
 
 	if a:timestampOffset != 0
-	    " Apply the offset to the matched position. 
+	    " Apply the offset to the matched position.
 	    call s:JumpToTimestampOffset(l:lnum, a:timestampOffset)
 	else
 	    execute l:lnum
@@ -273,11 +283,11 @@ endfunction
 
 function! logviewer#MasterEnter()
     " Clear away any range signs from a synced buffer, and mark the new target
-    " line. 
+    " line.
     call s:MarkTarget()
 endfunction
 function! logviewer#MasterLeave()
-    " Restore this as a synced buffer from the persisted data. 
+    " Restore this as a synced buffer from the persisted data.
     call s:MarkBuffer()
 endfunction
 
@@ -291,7 +301,7 @@ endfunction
 function! logviewer#InstallLogLineSync()
     " Sync the current log line via the timestamp to the cursor positions in all
     " other open log windows. Do this now and update when the cursor isn't
-    " moved. 
+    " moved.
     call logviewer#LineSync('')
 
     augroup logviewerSync
@@ -300,11 +310,11 @@ function! logviewer#InstallLogLineSync()
 	" To allow dynamic changing of the sync update (without having to
 	" re-apply the changed autocmds to all individual log buffers), we
 	" always register for all events, and ignore non-matches inside the
-	" event handler. 
+	" event handler.
 	autocmd CursorMoved <buffer> if <SID>IsMaster() | call logviewer#LineSync('CursorMoved') | endif
 	autocmd CursorHold  <buffer> if <SID>IsMaster() | call logviewer#LineSync('CursorHold')  | endif
 
-	" Handle change of master buffer containing the target timestamp. 
+	" Handle change of master buffer containing the target timestamp.
 	autocmd WinEnter <buffer> if ! <SID>HasFixedMaster() | call logviewer#MasterEnter() | endif
 	autocmd WinLeave <buffer> if ! <SID>HasFixedMaster() | call logviewer#MasterLeave() | endif
     augroup END
@@ -318,20 +328,20 @@ function! logviewer#Master()
 
     if g:logviewer_syncAll
 	" Set the master buffer and ignore non-matches inside the event
-	" handlers. 
+	" handlers.
 	let s:masterBufnr = bufnr('')
     else
-	" Create the autocmds just for this master buffer. 
+	" Create the autocmds just for this master buffer.
 	augroup logviewerSync
 	    " Delete all autocmds, either from a previous master buffer, or from
-	    " all log buffers via the auto-sync. 
+	    " all log buffers via the auto-sync.
 	    autocmd!
 
 	    autocmd CursorMoved <buffer> call logviewer#LineSync('CursorMoved')
 	    autocmd CursorHold  <buffer> call logviewer#LineSync('CursorHold')
 
 	    " The master buffer containing the target timestamp is fixed, no
-	    " need to adapt when jumping around windows. 
+	    " need to adapt when jumping around windows.
 	augroup END
     endif
 endfunction
