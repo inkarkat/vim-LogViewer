@@ -15,7 +15,18 @@ history				|logviewer-history|
 ==============================================================================
 DESCRIPTION					       *logviewer-description*
 
-This plugin ...
+Many applications produce multiple log files; there may be one per component
+or one production log and a separate debug log, or one from the server daemon
+and one from the client application. During analysis, one needs to step
+through them in tandem. Doing this manually in split windows is tedious;
+'scrollbind' usually doesn't help because different amounts of log lines are
+written to each file.
+
+As long as each log file provides a timestamp or similar monotonically
+increasing field, this plugin automatically syncs the cursor movement in one
+log window to all other windows. When moving to another line in the current
+window, all log lines that fall in the time range covered by the movement are
+highlighted automatically.
 
 HOW IT WORKS								     *
 
@@ -25,10 +36,32 @@ RELATED WORKS								     *
 
 ==============================================================================
 USAGE							     *logviewer-usage*
-								 *<Leader>Foo*
-<Leader>Foo		Description here.
-							  *:logviewer*
-:logviewer	Description here.
+							    *:LogViewerMaster*
+:LogViewerMaster	Designate the current buffer as the log master. Only
+			cursor movements in this buffer will sync to other
+			buffers; movements in other buffers won't affect the
+			markers any more.
+
+							    *:LogViewerUpdate*
+:LogViewerUpdate CursorMoved | CursorHold | Manual
+			Set the trigger for the syncing to the passed event.
+			By default, each cursor movement will immediately
+			update all other log buffers. With CursorHold, this
+			will only happen after 'updatetime'. With Manual, it
+			has to be explicitly triggered with
+			|:LogViewerTarget|.
+
+							    *:LogViewerTarget*
+:LogViewerTarget	Set the target log line (the basis for the
+			highlighting in all other log buffers) to the current
+			line in the current buffer.
+:[count]LogViewerTarget	Set the target log line to [count] timestamps down
+			from the current target timestamp.
+:LogViewerTarget {timestamp}
+			Set the target log line to the first timestamp that
+			matches {timestamp}. Useful to proceed to the
+			beginning of a date when interesting things have
+			happened.
 
 EXAMPLE							   *logviewer-example*
 
@@ -52,9 +85,52 @@ CONFIGURATION					     *logviewer-configuration*
 
 For a permanent configuration, put the following commands into your |vimrc|:
 
-						*g:logviewer_MyOption*
-To change the default TODO from FOO to BAR, use: >
-    let g:logviewer_MyOption = 'BAR'
+						      *g:logviewer_syncUpdate*
+To change the default update trigger (that can be switched via
+|:LogViewerUpdate| to Manual : >
+    let g:logviewer_syncUpdate = 'Manual'
+<
+							 *g:logviewer_syncAll*
+By default, there is no master log file; movements in any log buffer cause
+syncing in the other buffers. To turn that off: >
+    let g:logviewer_syncAll = 0
+You will need to use |:LogViewerMaster| on one log buffer to start the
+syncing.
+						       *g:logviewer_filetypes*
+Only buffers with certain filetypes are considered log files. The setting is a
+comma-separated list of filetypes (|autocmd-patterns|): >
+    let g:logviewer_filetypes = 'log4j,syslog'
+<
+							  *b:logTimestampExpr*
+By default, the timestamp is expected as a whitespace-separated decimal number
+starting at the first column. You should define the appropriate timestamp
+format for each log filetype (in |g:logviewer_filetypes|). Typically, this is
+done in ~/.vim/after/ftplugin/{filetype}.vim. For example, the log4j timestamp
+pattern corresponding to the "%d" format is: >
+    let b:logTimestampExpr = '^\d\S\+\d \d\S\+\d\ze\s' " %d, e.g. 2011-08-17 13:08:30,509
+To determine the chronological order, LogViewer uses a numerical compare for
+integer timestamps, and case-sensitive string comparison for everything else.
+
+							     *logviewer-signs*
+To mark the current target logline and the corresponding log line ranges in
+the other log buffers, LogViewer uses |signs|:
+    logviewerTarget	The target log line at the current cursor position, or
+			set via |:LogViewerTarget|
+    logviewerFrom	The (earliest when moving down towards later log
+			entries) log line corresponding to the move of the
+			target.
+    logviewerTo		The last log line corresponding to the move of the
+			target.
+
+You can redefine the sign definitions after the plugin/logviewer.vim script
+has been sourced, e.g.: >
+    runtime plugin/logviewer.vim
+    sign define logviewerTarget   text=T linehl=CursorLine
+<
+The default signs use line highlighting for a |hl-CursorLine|-like visual
+indication of the positions (the 'cursorline' setting is disabled
+automatically for log windows); you can define you own colors for those, too: >
+    highlight logviewerTarget gui=underline guibg=Red
 <
 ==============================================================================
 INTEGRATION					       *logviewer-integration*
@@ -67,6 +143,9 @@ KNOWN PROBLEMS					    *logviewer-known-problems*
 TODO							      *logviewer-todo*
 
 IDEAS							     *logviewer-ideas*
+
+- Compare and mark current lines that are identical in all logs. Keep those
+  lines so that a full picture emerges when moving along.
 
 ==============================================================================
 HISTORY							   *logviewer-history*
