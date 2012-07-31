@@ -1,6 +1,7 @@
 " logviewer.vim: Comfortable examination of multiple parallel logfiles.
 "
 " DEPENDENCIES:
+"   - EchoWithoutScrolling.vim autoload script
 
 " Copyright: (C) 2011-2012 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
@@ -8,6 +9,13 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"	004	31-Jul-2012	Print the collective summary for all moves in
+"				all log buffers. Print relative line offsets
+"				instead of absolute from..to line numbers; it's
+"				shorter and more expressive. Since this output
+"				should never interfere with cursor movement, and
+"				therefore must not provoke the hit-enter prompt,
+"				use EchoWithoutScrolling for it.
 "	003	24-Jul-2012	Allow customization of the window where log
 "				lines are synced via User autocmd.
 "	002	24-Aug-2011	Implement marking of target line in master
@@ -115,6 +123,7 @@ function! s:MarkBuffer()
     endif
 endfunction
 function! s:AdvanceToTimestamp( timestamp, isBackward )
+    let l:summary = ''
     let l:originalLnum = line('.')
     " The current timestamp is either on the current line or above it.
     let [l:lnum, l:currentTimestamp] = s:GetNextTimestamp(l:originalLnum + 1, -1)
@@ -136,11 +145,13 @@ function! s:AdvanceToTimestamp( timestamp, isBackward )
 	let b:logviewer_fromLnum = l:originalLnum + 1
 	let b:logviewer_toLnum = l:updatedLnum
 
-	echo bufname('') 'move from' l:originalLnum 'to' l:updatedLnum
+	let l:summary = printf('%s: %+d', bufname(''), (l:updatedLnum - l:originalLnum))
     endif
 
     " Always update the marks; the target may have changed by switching windows.
     call s:MarkBuffer()
+
+    return l:summary
 endfunction
 
 function! s:OnSyncWin()
@@ -158,6 +169,7 @@ function! s:SyncToTimestamp( timestamp, isBackward )
     " same buffer.
     let l:syncedBufNrs = [bufnr('')]
 
+    let l:summaries = []
     let l:originalWindowLayout = winrestcmd()
 	let l:originalWinNr = winnr()
 
@@ -167,13 +179,18 @@ function! s:SyncToTimestamp( timestamp, isBackward )
 	    \	    s:IsLogBuffer() &&
 	    \	    index(l:syncedBufNrs, bufnr('')) == -1
 	    \	) |
-	    \	    call s:AdvanceToTimestamp(a:timestamp, a:isBackward) |
+	    \	    call add(l:summaries, s:AdvanceToTimestamp(a:timestamp, a:isBackward)) |
 	    \	    call add(l:syncedBufNrs, bufnr('')) |
 	    \       call s:OnSyncWin() |
 	    \	endif
 
 	execute 'noautocmd' l:originalWinNr . 'wincmd w'
     silent! execute l:originalWindowLayout
+
+    call filter(l:summaries, '! empty(v:val)')
+    if ! empty(l:summaries)
+	call EchoWithoutScrolling#Echo(join(l:summaries, '; '))
+    endif
 endfunction
 
 function! logviewer#LineSync( syncEvent )
