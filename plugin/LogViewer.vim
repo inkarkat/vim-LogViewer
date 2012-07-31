@@ -1,12 +1,10 @@
 " logviewer.vim: Comfortable examination of multiple parallel logfiles.
 "
-" IDEAS:
-"   - Compare and mark current lines that are identical in all logs. Keep those
-"     lines so that a full picture emerges when moving along.
-"
 " DEPENDENCIES:
+"   - Requires Vim 7.0 or higher.
+"   - logviewer.vim autoload script
 "
-" Copyright: (C) 2011 Ingo Karkat
+" Copyright: (C) 2011-2012 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
