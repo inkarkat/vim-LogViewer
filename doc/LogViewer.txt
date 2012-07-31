@@ -28,6 +28,9 @@ log window to all other windows. When moving to another line in the current
 window, all log lines that fall in the time range covered by the movement are
 highlighted automatically.
 
+An example screenshot can be found at
+    http://ingo-karkat.de/swdev/vim/logviewer.png
+
 HOW IT WORKS								     *
 
 SEE ALSO								     *
