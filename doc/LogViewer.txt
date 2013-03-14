@@ -1,26 +1,26 @@
-*logviewer.txt*         Comfortable examination of multiple parallel logfiles.
+*LogViewer.txt*         Comfortable examination of multiple parallel logfiles.
 
 			 LOGVIEWER    by Ingo Karkat
-							       *logviewer.vim*
-description			|logviewer-description|
-usage				|logviewer-usage|
-installation			|logviewer-installation|
-configuration			|logviewer-configuration|
-integration			|logviewer-integration|
-limitations			|logviewer-limitations|
-known problems			|logviewer-known-problems|
-todo				|logviewer-todo|
-history				|logviewer-history|
+							       *LogViewer.vim*
+description			|LogViewer-description|
+usage				|LogViewer-usage|
+installation			|LogViewer-installation|
+configuration			|LogViewer-configuration|
+integration			|LogViewer-integration|
+limitations			|LogViewer-limitations|
+known problems			|LogViewer-known-problems|
+todo				|LogViewer-todo|
+history				|LogViewer-history|
 
 ==============================================================================
-DESCRIPTION					       *logviewer-description*
+DESCRIPTION					       *LogViewer-description*
 
 Many applications produce multiple log files; there may be one per component
 or one production log and a separate debug log, or one from the server daemon
-and one from the client application. During analysis, one needs to step
-through them in tandem. Doing this manually in split windows is tedious;
-'scrollbind' usually doesn't help because different amounts of log lines are
-written to each file.
+and one from the client application. During analysis, one may need to step
+through them in tandem, when one provides details that the other doesn't.
+Doing this manually in split windows is tedious; 'scrollbind' usually doesn't
+help because different amounts of log lines are written to each file.
 
 As long as each log file provides a timestamp or similar monotonically
 increasing field, this plugin automatically syncs the cursor movement in one
@@ -29,16 +29,33 @@ window, all log lines that fall in the time range covered by the movement are
 highlighted automatically.
 
 An example screenshot can be found at
-    http://ingo-karkat.de/swdev/vim/logviewer.png
-
-HOW IT WORKS								     *
+    http://ingo-karkat.de/swdev/vim/LogViewer.png
 
 SEE ALSO								     *
 
 RELATED WORKS								     *
 
 ==============================================================================
-USAGE							     *logviewer-usage*
+USAGE							     *LogViewer-usage*
+
+With the default automatic syncing, any filetype specifying a log file will
+automatically set up the corresponding autocommands; without it, you need to
+enable syncing via |:LogViewerMaster|. The current line in the current buffer
+will be highlighted and marked with the "T" (for target) sign:
+T 2012-08-01 10:01:22.342 ~
+
+When you move to another line, the plugin will mark the synced move in other
+buffers to an adjacent line like this:
+  2012-08-01 10:01:22.342 ~
+> 2012-08-01 10:01:23.234 ~
+When the timespan in the current buffer covers multiple log lines in another
+buffer, the start of the range is marked with "-" and the end of the range
+with "V" (downward move) / "^" (upward move):
+  2012-08-01 10:01:22.342 ~
+- 2012-08-01 10:01:23.234 ~
+  2012-08-01 10:01:23.250 ~
+V 2012-08-01 10:01:26.012 ~
+
 							    *:LogViewerMaster*
 :LogViewerMaster	Designate the current buffer as the log master. Only
 			cursor movements in this buffer will sync to other
@@ -66,94 +83,92 @@ USAGE							     *logviewer-usage*
 			beginning of a date when interesting things have
 			happened.
 
-EXAMPLE							   *logviewer-example*
-
 ==============================================================================
-INSTALLATION					      *logviewer-installation*
+INSTALLATION					      *LogViewer-installation*
 
 This script is packaged as a |vimball|. If you have the "gunzip" decompressor
 in your PATH, simply edit the *.vba.gz package in Vim; otherwise, decompress
 the archive first, e.g. using WinZip. Inside Vim, install by sourcing the
 vimball or via the |:UseVimball| command. >
-    vim logviewer.vba.gz
+    vim LogViewer.vba.gz
     :so %
 To uninstall, use the |:RmVimball| command.
 
-DEPENDENCIES					      *logviewer-dependencies*
+DEPENDENCIES					      *LogViewer-dependencies*
 
 - Requires Vim 7.0 or higher.
 
 ==============================================================================
-CONFIGURATION					     *logviewer-configuration*
+CONFIGURATION					     *LogViewer-configuration*
 
 For a permanent configuration, put the following commands into your |vimrc|:
 
-						      *g:logviewer_syncUpdate*
+						      *g:LogViewer_SyncUpdate*
 To change the default update trigger (that can be switched via
 |:LogViewerUpdate| to Manual : >
-    let g:logviewer_syncUpdate = 'Manual'
+    let g:LogViewer_SyncUpdate = 'Manual'
 <
-							 *g:logviewer_syncAll*
+							 *g:LogViewer_SyncAll*
 By default, there is no master log file; movements in any log buffer cause
 syncing in the other buffers. To turn that off: >
-    let g:logviewer_syncAll = 0
+    let g:LogViewer_SyncAll = 0
 You will need to use |:LogViewerMaster| on one log buffer to start the
 syncing.
-						       *g:logviewer_filetypes*
+						       *g:LogViewer_Filetypes*
 Only buffers with certain filetypes are considered log files. The setting is a
 comma-separated list of filetypes (|autocmd-patterns|): >
-    let g:logviewer_filetypes = 'log4j,syslog'
+    let g:LogViewer_Filetypes = 'log4j,syslog'
 <
 							  *b:logTimestampExpr*
 By default, the timestamp is expected as a whitespace-separated decimal number
 starting at the first column. You should define the appropriate timestamp
-format for each log filetype (in |g:logviewer_filetypes|). Typically, this is
+format for each log filetype (in |g:LogViewer_Filetypes|). Typically, this is
 done in ~/.vim/after/ftplugin/{filetype}.vim. For example, the log4j timestamp
 pattern corresponding to the "%d" format is: >
     let b:logTimestampExpr = '^\d\S\+\d \d\S\+\d\ze\s' " %d, e.g. 2011-08-17 13:08:30,509
 To determine the chronological order, LogViewer uses a numerical compare for
 integer timestamps, and case-sensitive string comparison for everything else.
 
-							     *logviewer-signs*
+							     *LogViewer-signs*
 To mark the current target logline and the corresponding log line ranges in
 the other log buffers, LogViewer uses |signs|:
-    logviewerTarget	The target log line at the current cursor position, or
+    LogViewerTarget	The target log line at the current cursor position, or
 			set via |:LogViewerTarget|
-    logviewerFrom	The (earliest when moving down towards later log
+    LogViewerFrom	The (earliest when moving down towards later log
 			entries) log line corresponding to the move of the
 			target.
-    logviewerTo		The last log line corresponding to the move of the
+    LogViewerTo		The last log line corresponding to the move of the
 			target.
 
-You can redefine the sign definitions after the plugin/logviewer.vim script
+You can redefine the sign definitions after the plugin/LogViewer.vim script
 has been sourced, e.g.: >
-    runtime plugin/logviewer.vim
-    sign define logviewerTarget   text=T linehl=CursorLine
+    runtime plugin/LogViewer.vim
+    sign define LogViewerTarget   text=T linehl=CursorLine
 <
 The default signs use line highlighting for a |hl-CursorLine|-like visual
 indication of the positions (the 'cursorline' setting is disabled
 automatically for log windows); you can define you own colors for those, too: >
-    highlight logviewerTarget gui=underline guibg=Red
+    highlight LogViewerTarget gui=underline guibg=Red
 <
 ==============================================================================
-INTEGRATION					       *logviewer-integration*
+INTEGRATION					       *LogViewer-integration*
 
 ==============================================================================
-LIMITATIONS					       *logviewer-limitations*
+LIMITATIONS					       *LogViewer-limitations*
 
-KNOWN PROBLEMS					    *logviewer-known-problems*
+KNOWN PROBLEMS					    *LogViewer-known-problems*
 
-TODO							      *logviewer-todo*
+TODO							      *LogViewer-todo*
 
-IDEAS							     *logviewer-ideas*
+IDEAS							     *LogViewer-ideas*
 
 - Compare and mark current lines that are identical in all logs. Keep those
   lines so that a full picture emerges when moving along.
 
 ==============================================================================
-HISTORY							   *logviewer-history*
+HISTORY							   *LogViewer-history*
 
-GOAL
+1.00	01-Aug-2012
 First published version.
 
 0.01	23-Aug-2011
