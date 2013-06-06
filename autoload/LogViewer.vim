@@ -9,6 +9,9 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.00.005	01-Aug-2012	Clear the collective summary when no syncing was
+"				done; keeping the previous summary around is
+"				confusing.
 "   1.00.004	31-Jul-2012	Print the collective summary for all moves in
 "				all log buffers. Print relative line offsets
 "				instead of absolute from..to line numbers; it's
@@ -187,9 +190,10 @@ function! s:SyncToTimestamp( timestamp, isBackward )
 	execute 'noautocmd' l:originalWinNr . 'wincmd w'
     silent! execute l:originalWindowLayout
 
-    call filter(l:summaries, '! empty(v:val)')
     if ! empty(l:summaries)
-	call EchoWithoutScrolling#Echo(join(l:summaries, '; '))
+	" We have found other log buffers, print their summaries or clear the
+	" last summary when no syncing was done.
+	call EchoWithoutScrolling#Echo(join(filter(l:summaries, '! empty(v:val)'), '; '))
     endif
 endfunction
 
