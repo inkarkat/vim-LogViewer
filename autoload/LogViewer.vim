@@ -1,14 +1,15 @@
 " LogViewer.vim: Comfortable examination of multiple parallel logfiles.
 "
 " DEPENDENCIES:
-"   - EchoWithoutScrolling.vim autoload script
+"   - ingo/avoidprompt.vim autoload script
 
-" Copyright: (C) 2011-2012 Ingo Karkat
+" Copyright: (C) 2011-2013 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.01.006	07-Jun-2013	Move EchoWithoutScrolling.vim into ingo-library.
 "   1.00.005	01-Aug-2012	Clear the collective summary when no syncing was
 "				done; keeping the previous summary around is
 "				confusing.
@@ -193,7 +194,7 @@ function! s:SyncToTimestamp( timestamp, isBackward )
     if ! empty(l:summaries)
 	" We have found other log buffers, print their summaries or clear the
 	" last summary when no syncing was done.
-	call EchoWithoutScrolling#Echo(join(filter(l:summaries, '! empty(v:val)'), '; '))
+	call ingo#avoidprompt#Echo(join(filter(l:summaries, '! empty(v:val)'), '; '))
     endif
 endfunction
 
