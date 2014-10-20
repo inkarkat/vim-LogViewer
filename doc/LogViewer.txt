@@ -87,16 +87,18 @@ V 2012-08-01 10:01:26.012 ~
 INSTALLATION					      *LogViewer-installation*
 
 This script is packaged as a |vimball|. If you have the "gunzip" decompressor
-in your PATH, simply edit the *.vba.gz package in Vim; otherwise, decompress
+in your PATH, simply edit the *.vmb.gz package in Vim; otherwise, decompress
 the archive first, e.g. using WinZip. Inside Vim, install by sourcing the
 vimball or via the |:UseVimball| command. >
-    vim LogViewer.vba.gz
+    vim LogViewer*.vmb.gz
     :so %
 To uninstall, use the |:RmVimball| command.
 
 DEPENDENCIES					      *LogViewer-dependencies*
 
 - Requires Vim 7.0 or higher.
+- Requires the |ingo-library.vim| plugin (vimscript #4433), version 1.008 or
+  higher.
 
 ==============================================================================
 CONFIGURATION					     *LogViewer-configuration*
@@ -168,6 +170,9 @@ IDEAS							     *LogViewer-ideas*
 ==============================================================================
 HISTORY							   *LogViewer-history*
 
+1.01	RELEASEME
+- Add dependency to ingo-library (vimscript #4433).
+
 1.00	01-Aug-2012
 First published version.
 
@@ -175,7 +180,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2012 Ingo Karkat
+Copyright: (C) 2011-2013 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
