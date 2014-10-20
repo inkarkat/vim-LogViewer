@@ -2,13 +2,15 @@
 "
 " DEPENDENCIES:
 "   - ingo/avoidprompt.vim autoload script
+"   - ingo/err.vim autoload script
 
-" Copyright: (C) 2011-2013 Ingo Karkat
+" Copyright: (C) 2011-2014 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.01.003	05-May-2014	Abort on error.
 "   1.01.006	07-Jun-2013	Move EchoWithoutScrolling.vim into ingo-library.
 "   1.00.005	01-Aug-2012	Clear the collective summary when no syncing was
 "				done; keeping the previous summary around is
@@ -265,24 +267,16 @@ function! s:JumpToTimestampOffset( startLnum, offset )
 endfunction
 function! LogViewer#SetTarget( timestampOffset, targetSpec )
     if ! s:IsLogBuffer()
-	let v:errmsg = 'Not in log buffer'
-	echohl ErrorMsg
-	echomsg v:errmsg
-	echohl None
-
-	return
+	call ingo#err#Set('Not in log buffer')
+	return 0
     endif
 
     if ! empty(a:targetSpec)
 	" Search for a timestamp matching the passed target specification.
 	let l:lnum = s:FindTimestamp(a:targetSpec)
 	if l:lnum == -1
-	    let v:errmsg = 'No timestamp matching "' . a:targetSpec . '" found'
-	    echohl ErrorMsg
-	    echomsg v:errmsg
-	    echohl None
-
-	    return
+	    call ingo#err#Set('No timestamp matching "' . a:targetSpec . '" found')
+	    return 0
 	endif
 
 	if a:timestampOffset != 0
@@ -301,6 +295,7 @@ function! LogViewer#SetTarget( timestampOffset, targetSpec )
     endif
 
     call LogViewer#LineSync('')
+    return 1
 endfunction
 
 function! LogViewer#MasterEnter()
