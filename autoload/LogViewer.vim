@@ -10,6 +10,10 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.01.004	21-Oct-2014	Syncing on the CursorMoved event disturbs the
+"				selection, making it impossible to select
+"				multiple log lines. Explicitly restore the
+"				visual selection.
 "   1.01.003	05-May-2014	Abort on error.
 "   1.01.006	07-Jun-2013	Move EchoWithoutScrolling.vim into ingo-library.
 "   1.00.005	01-Aug-2012	Clear the collective summary when no syncing was
@@ -221,9 +225,15 @@ function! LogViewer#LineSync( syncEvent )
     endif
     let b:LogViewer_prevline = line('.')
 
+    let l:mode = mode()
     let l:timestamp = s:GetTimestamp('.')
     if ! empty(l:timestamp)
 	call s:SyncToTimestamp(l:timestamp, l:isBackward)
+
+	if a:syncEvent =~# 'CursorMoved' && l:mode =~# "[vV\<C-v>]"
+	    " The sync has disturbed the selection; restore it.
+	    normal! gv
+	endif
     endif
 endfunction
 
