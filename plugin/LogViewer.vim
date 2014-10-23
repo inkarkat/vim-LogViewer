@@ -11,6 +11,7 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.01.005	24-Oct-2014	:LogViewerMaster now also may return an error.
 "   1.01.004	05-May-2014	Abort on error.
 "   1.00.003	24-Jul-2012	Change LogViewerTarget background highlighting
 "				to LightYellow; the original Orange looks too
@@ -46,7 +47,7 @@ endif
 "- commands --------------------------------------------------------------------
 
 " Turn off syncing in all buffers other that the current one.
-command! -bar LogViewerMaster call LogViewer#Master()
+command! -bar LogViewerMaster if ! LogViewer#Master() | echoerr ingo#err#Get() | endif
 
 " Change g:LogViewer_SyncUpdate
 function! s:SetSyncUpdate( syncUpdate )
