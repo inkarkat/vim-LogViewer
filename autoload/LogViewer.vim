@@ -10,6 +10,11 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.01.005	24-Oct-2014	Also check for log buffer on :LogViewerMaster
+"				instead of failing with "E216: No such group or
+"				event: LogViewerSync * <buffer>".
+"				Give hint on how to enable the plugin in error
+"				message.
 "   1.01.004	21-Oct-2014	Syncing on the CursorMoved event disturbs the
 "				selection, making it impossible to select
 "				multiple log lines. Explicitly restore the
@@ -275,10 +280,16 @@ function! s:JumpToTimestampOffset( startLnum, offset )
 
     execute l:lnum
 endfunction
+function! s:NotInLogBufferError()
+    call ingo#err#Set(printf('Not in log buffer; :set filetype%s %s',
+    \   (g:LogViewer_Filetypes =~# ',' ? ' to one of:' : ''),
+    \   g:LogViewer_Filetypes
+    \))
+    return 0
+endfunction
 function! LogViewer#SetTarget( timestampOffset, targetSpec )
     if ! s:IsLogBuffer()
-	call ingo#err#Set('Not in log buffer')
-	return 0
+	return s:NotInLogBufferError()
     endif
 
     if ! empty(a:targetSpec)
@@ -347,10 +358,14 @@ function! LogViewer#InstallLogLineSync()
     augroup END
 endfunction
 function! s:DeinstallLogLineSync()
-    autocmd! LogViewerSync * <buffer>
+    silent! autocmd! LogViewerSync * <buffer>
 endfunction
 
 function! LogViewer#Master()
+    if ! s:IsLogBuffer()
+	return s:NotInLogBufferError()
+    endif
+
     call LogViewer#LineSync('')
 
     if g:LogViewer_SyncAll
@@ -371,6 +386,7 @@ function! LogViewer#Master()
 	    " need to adapt when jumping around windows.
 	augroup END
     endif
+    return 1
 endfunction
 
 let &cpo = s:save_cpo
