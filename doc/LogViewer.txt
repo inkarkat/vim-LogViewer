@@ -176,7 +176,7 @@ IDEAS							     *LogViewer-ideas*
 ==============================================================================
 HISTORY							   *LogViewer-history*
 
-1.10	RELEASEME
+1.10	29-Oct-2014
 - Syncing on the CursorMoved event disturbs the selection, making it
   impossible to select multiple log lines. Explicitly restore the visual
   selection.
