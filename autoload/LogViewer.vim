@@ -10,11 +10,15 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
-"   1.01.005	24-Oct-2014	Also check for log buffer on :LogViewerMaster
+"   1.10.005	24-Oct-2014	Also check for log buffer on :LogViewerMaster
 "				instead of failing with "E216: No such group or
 "				event: LogViewerSync * <buffer>".
 "				Give hint on how to enable the plugin in error
 "				message.
+"				Also consider buffers where b:LogViewer_Enabled
+"				is set and true.
+"				Expose s:DeinstallLogLineSync() for
+"				:LogViewerDisable and also clear signs then.
 "   1.01.004	21-Oct-2014	Syncing on the CursorMoved event disturbs the
 "				selection, making it impossible to select
 "				multiple log lines. Explicitly restore the
@@ -48,6 +52,9 @@ function! s:GetTimestamp( lnum )
 endfunction
 
 function! s:IsLogBuffer()
+    if exists('b:LogViewer_Enabled')
+	return b:LogViewer_Enabled
+    endif
     return (index(split(g:LogViewer_Filetypes, ','), &l:filetype) != -1)
 endfunction
 
@@ -216,7 +223,7 @@ function! LogViewer#LineSync( syncEvent )
 
     if ! s:IsLogBuffer()
 	" The filetype must have changed to a non-logfile.
-	call s:DeinstallLogLineSync()
+	call LogViewer#DeinstallLogLineSync()
 	return
     endif
 
@@ -281,7 +288,7 @@ function! s:JumpToTimestampOffset( startLnum, offset )
     execute l:lnum
 endfunction
 function! s:NotInLogBufferError()
-    call ingo#err#Set(printf('Not in log buffer; :set filetype%s %s',
+    call ingo#err#Set(printf('Not in log buffer; either :LogViewerEnable or :set filetype%s %s',
     \   (g:LogViewer_Filetypes =~# ',' ? ' to one of:' : ''),
     \   g:LogViewer_Filetypes
     \))
@@ -357,7 +364,8 @@ function! LogViewer#InstallLogLineSync()
 	autocmd WinLeave <buffer> if ! <SID>HasFixedMaster() | call LogViewer#MasterLeave() | endif
     augroup END
 endfunction
-function! s:DeinstallLogLineSync()
+function! LogViewer#DeinstallLogLineSync()
+    call s:SignClear()
     silent! autocmd! LogViewerSync * <buffer>
 endfunction
 
