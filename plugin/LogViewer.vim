@@ -11,7 +11,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
-"   1.01.005	24-Oct-2014	:LogViewerMaster now also may return an error.
+"   1.10.005	24-Oct-2014	:LogViewerMaster now also may return an error.
+"				Add :LogViewerEnable and :LogViewerDisable.
 "   1.01.004	05-May-2014	Abort on error.
 "   1.00.003	24-Jul-2012	Change LogViewerTarget background highlighting
 "				to LightYellow; the original Orange looks too
@@ -45,6 +46,9 @@ endif
 
 
 "- commands --------------------------------------------------------------------
+
+command! -bar LogViewerEnable  let b:LogViewer_Enabled = 1 | if g:LogViewer_SyncAll | call LogViewer#InstallLogLineSync() | endif
+command! -bar LogViewerDisable let b:LogViewer_Enabled = 0 | call LogViewer#DeinstallLogLineSync()
 
 " Turn off syncing in all buffers other that the current one.
 command! -bar LogViewerMaster if ! LogViewer#Master() | echoerr ingo#err#Get() | endif
