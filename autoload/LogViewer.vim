@@ -4,12 +4,14 @@
 "   - ingo/avoidprompt.vim autoload script
 "   - ingo/err.vim autoload script
 
-" Copyright: (C) 2011-2014 Ingo Karkat
+" Copyright: (C) 2011-2015 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.11.006	30-Jan-2015	ENH: Keep previous (last accessed) window on
+"				:windo.
 "   1.10.005	24-Oct-2014	Also check for log buffer on :LogViewerMaster
 "				instead of failing with "E216: No such group or
 "				event: LogViewerSync * <buffer>".
@@ -194,6 +196,7 @@ function! s:SyncToTimestamp( timestamp, isBackward )
     let l:summaries = []
     let l:originalWindowLayout = winrestcmd()
 	let l:originalWinNr = winnr()
+	let l:previousWinNr = winnr('#') ? winnr('#') : 1
 
 	    noautocmd windo
 	    \	if (
@@ -206,7 +209,8 @@ function! s:SyncToTimestamp( timestamp, isBackward )
 	    \       call s:OnSyncWin() |
 	    \	endif
 
-	execute 'noautocmd' l:originalWinNr . 'wincmd w'
+	noautocmd execute l:previousWinNr . 'wincmd w'
+	noautocmd execute l:originalWinNr . 'wincmd w'
     silent! execute l:originalWindowLayout
 
     if ! empty(l:summaries)
