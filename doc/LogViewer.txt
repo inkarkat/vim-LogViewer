@@ -176,6 +176,9 @@ IDEAS							     *LogViewer-ideas*
 ==============================================================================
 HISTORY							   *LogViewer-history*
 
+1.11	RELEASEME
+- ENH: Keep previous (last accessed) window on :windo.
+
 1.10	29-Oct-2014
 - Syncing on the CursorMoved event disturbs the selection, making it
   impossible to select multiple log lines. Explicitly restore the visual
@@ -195,7 +198,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2014 Ingo Karkat
+Copyright: (C) 2011-2015 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
