@@ -4,12 +4,16 @@
 "   - ingo/avoidprompt.vim autoload script
 "   - ingo/err.vim autoload script
 
-" Copyright: (C) 2011-2015 Ingo Karkat
+" Copyright: (C) 2011-2016 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.11.007	12-Aug-2016	BUG: Movement in visual mode either causes beeps
+"				(at first selection) or distorts the selection;
+"				need to exit visual mode before syncing to be
+"				able to properly restore it.
 "   1.11.006	30-Jan-2015	ENH: Keep previous (last accessed) window on
 "				:windo.
 "   1.10.005	24-Oct-2014	Also check for log buffer on :LogViewerMaster
@@ -244,9 +248,15 @@ function! LogViewer#LineSync( syncEvent )
     let l:mode = mode()
     let l:timestamp = s:GetTimestamp('.')
     if ! empty(l:timestamp)
+	let l:isVisualMove = (a:syncEvent =~# 'CursorMoved' && l:mode =~# "[vV\<C-v>]")
+	if l:isVisualMove
+	    " The sync will disturbed the selection; first cancel it, so that it
+	    " can be restored later.
+	    execute "normal! \<C-\>\<C-n>"
+	endif
 	call s:SyncToTimestamp(l:timestamp, l:isBackward)
 
-	if a:syncEvent =~# 'CursorMoved' && l:mode =~# "[vV\<C-v>]"
+	if l:isVisualMove
 	    " The sync has disturbed the selection; restore it.
 	    normal! gv
 	endif
