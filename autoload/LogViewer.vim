@@ -3,13 +3,15 @@
 " DEPENDENCIES:
 "   - ingo/avoidprompt.vim autoload script
 "   - ingo/err.vim autoload script
+"   - ingo/event.vim autoload script
 
-" Copyright: (C) 2011-2016 Ingo Karkat
+" Copyright: (C) 2011-2017 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.11.008	08-Dec-2017	Replace :doautocmd with ingo#event#Trigger().
 "   1.11.007	12-Aug-2016	BUG: Movement in visual mode either causes beeps
 "				(at first selection) or distorts the selection;
 "				need to exit visual mode before syncing to be
@@ -186,7 +188,7 @@ function! s:OnSyncWin()
     " Allow customization of the window where log lines are synced.
     " For example, when the sign highlights the entire line, the 'cursorline'
     " setting should be turned off.
-    silent doautocmd User LogviewerSyncWin
+    call ingo#event#TriggerCustom('LogviewerSyncWin')
 endfunction
 function! s:SyncToTimestamp( timestamp, isBackward )
     call s:MarkTarget()
