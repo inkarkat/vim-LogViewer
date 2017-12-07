@@ -178,6 +178,9 @@ HISTORY							   *LogViewer-history*
 
 1.11	RELEASEME
 - ENH: Keep previous (last accessed) window on :windo.
+- BUG: Movement in visual mode either causes beeps (at first selection) or
+  distorts the selection; need to exit visual mode before syncing to be able
+  to properly restore it.
 
 1.10	29-Oct-2014
 - Syncing on the CursorMoved event disturbs the selection, making it
@@ -198,7 +201,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2015 Ingo Karkat
+Copyright: (C) 2011-2016 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
