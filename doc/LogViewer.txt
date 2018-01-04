@@ -103,7 +103,7 @@ To uninstall, use the |:RmVimball| command.
 DEPENDENCIES					      *LogViewer-dependencies*
 
 - Requires Vim 7.0 or higher.
-- Requires the |ingo-library.vim| plugin (vimscript #4433), version 1.023 or
+- Requires the |ingo-library.vim| plugin (vimscript #4433), version 1.032 or
   higher.
 
 ==============================================================================
@@ -131,7 +131,7 @@ comma-separated list of filetypes (|autocmd-patterns|): >
 By default, the timestamp is expected as a whitespace-separated decimal number
 starting at the first column. You should define the appropriate timestamp
 format for each log filetype (from |g:LogViewer_Filetypes|). Typically, this
-is done in ~/.vim//ftplugin/{filetype}_LogViewer.vim. For example, the log4j
+is done in ~/.vim/ftplugin/{filetype}_LogViewer.vim. For example, the log4j
 timestamp pattern corresponding to the "%d" format is: >
     let b:logTimestampExpr = '^\d\S\+\d \d\S\+\d\ze\s' " %d, e.g. 2011-08-17 13:08:30,509
 To determine the chronological order, LogViewer uses a numerical compare for
@@ -181,7 +181,12 @@ HISTORY							   *LogViewer-history*
 - BUG: Movement in visual mode either causes beeps (at first selection) or
   distorts the selection; need to exit visual mode before syncing to be able
   to properly restore it.
-  *** You need to update to ingo-library (vimscript #4433) version 1.023! ***
+- Don't override existing b:logTimestampExpr in ftplugin/log4j_LogViewer.vim.
+  This way, users don't necessarily need to use after/ftplugin to override
+  this with a custom value.
+- Use first non-empty line in buffer to detect used log4j timestamp format.
+- Add precise pattern for %d log4j format, and check that first.
+  *** You need to update to ingo-library (vimscript #4433) version 1.032! ***
 
 1.10	29-Oct-2014
 - Syncing on the CursorMoved event disturbs the selection, making it
@@ -202,7 +207,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2017 Ingo Karkat
+Copyright: (C) 2011-2018 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
