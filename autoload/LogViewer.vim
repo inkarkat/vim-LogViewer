@@ -5,52 +5,10 @@
 "   - ingo/err.vim autoload script
 "   - ingo/event.vim autoload script
 
-" Copyright: (C) 2011-2017 Ingo Karkat
+" Copyright: (C) 2011-2018 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
-"
-" REVISION	DATE		REMARKS
-"   1.11.008	08-Dec-2017	Replace :doautocmd with ingo#event#Trigger().
-"   1.11.007	12-Aug-2016	BUG: Movement in visual mode either causes beeps
-"				(at first selection) or distorts the selection;
-"				need to exit visual mode before syncing to be
-"				able to properly restore it.
-"   1.11.006	30-Jan-2015	ENH: Keep previous (last accessed) window on
-"				:windo.
-"   1.10.005	24-Oct-2014	Also check for log buffer on :LogViewerMaster
-"				instead of failing with "E216: No such group or
-"				event: LogViewerSync * <buffer>".
-"				Give hint on how to enable the plugin in error
-"				message.
-"				Also consider buffers where b:LogViewer_Enabled
-"				is set and true.
-"				Expose s:DeinstallLogLineSync() for
-"				:LogViewerDisable and also clear signs then.
-"   1.01.004	21-Oct-2014	Syncing on the CursorMoved event disturbs the
-"				selection, making it impossible to select
-"				multiple log lines. Explicitly restore the
-"				visual selection.
-"   1.01.003	05-May-2014	Abort on error.
-"   1.01.006	07-Jun-2013	Move EchoWithoutScrolling.vim into ingo-library.
-"   1.00.005	01-Aug-2012	Clear the collective summary when no syncing was
-"				done; keeping the previous summary around is
-"				confusing.
-"   1.00.004	31-Jul-2012	Print the collective summary for all moves in
-"				all log buffers. Print relative line offsets
-"				instead of absolute from..to line numbers; it's
-"				shorter and more expressive. Since this output
-"				should never interfere with cursor movement, and
-"				therefore must not provoke the hit-enter prompt,
-"				use EchoWithoutScrolling for it.
-"	003	24-Jul-2012	Allow customization of the window where log
-"				lines are synced via User autocmd.
-"	002	24-Aug-2011	Implement marking of target line in master
-"				buffer, correct updating when moving across
-"				windows, auto-sync and manual setting of a
-"				master buffer.
-"	001	23-Aug-2011	file creation
-
 let s:save_cpo = &cpo
 set cpo&vim
 

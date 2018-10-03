@@ -28,8 +28,8 @@ log window to all other windows. When moving to another line in the current
 window, all log lines that fall in the time range covered by the movement are
 highlighted automatically.
 
-An example screenshot can be found at
-    http://ingo-karkat.de/swdev/vim/LogViewer.png
+This screenshot shows the plugin in action:
+    https://raw.githubusercontent.com/inkarkat/vim-LogViewer/master/doc/LogViewer.png
 
 ==============================================================================
 USAGE							     *LogViewer-usage*
@@ -92,10 +92,16 @@ V 2012-08-01 10:01:26.012 ~
 ==============================================================================
 INSTALLATION					      *LogViewer-installation*
 
-This script is packaged as a |vimball|. If you have the "gunzip" decompressor
-in your PATH, simply edit the *.vmb.gz package in Vim; otherwise, decompress
-the archive first, e.g. using WinZip. Inside Vim, install by sourcing the
-vimball or via the |:UseVimball| command. >
+The code is hosted in a Git repo at
+    https://github.com/inkarkat/vim-LogViewer
+You can use your favorite plugin manager, or "git clone" into a directory used
+for Vim |packages|. Releases are on the "stable" branch, the latest unstable
+development snapshot on "master".
+
+This script is also packaged as a |vimball|. If you have the "gunzip"
+decompressor in your PATH, simply edit the *.vmb.gz package in Vim; otherwise,
+decompress the archive first, e.g. using WinZip. Inside Vim, install by
+sourcing the vimball or via the |:UseVimball| command. >
     vim LogViewer*.vmb.gz
     :so %
 To uninstall, use the |:RmVimball| command.
@@ -173,10 +179,15 @@ IDEAS							     *LogViewer-ideas*
 - Compare and mark current lines that are identical in all logs. Keep those
   lines so that a full picture emerges when moving along.
 
+CONTRIBUTING						*LogViewer-contribute*
+
+Report any bugs, send patches, or suggest features via the issue tracker at
+https://github.com/inkarkat/vim-LogViewer/issues or email (address below).
+
 ==============================================================================
 HISTORY							   *LogViewer-history*
 
-1.11	RELEASEME
+1.11	03-Oct-2018
 - ENH: Keep previous (last accessed) window on :windo.
 - BUG: Movement in visual mode either causes beeps (at first selection) or
   distorts the selection; need to exit visual mode before syncing to be able

@@ -7,14 +7,6 @@
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
-"
-" REVISION	DATE		REMARKS
-"   1.11.002	05-Jan-2018	Don't override existing b:logTimestampExpr.
-"				Use first non-empty line in buffer to detect
-"				used log4j timestamp format.
-"				Add precise pattern for %d log4j format, and
-"				check that first.
-"   1.00.001	23-Aug-2011	file creation
 
 if exists('b:logTimestampExpr') | finish | endif
 
