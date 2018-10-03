@@ -5,25 +5,10 @@
 "   - LogViewer.vim autoload script
 "   - ingo/err.vim autoload script
 "
-" Copyright: (C) 2011-2014 Ingo Karkat
+" Copyright: (C) 2011-2018 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
-"
-" REVISION	DATE		REMARKS
-"   1.10.005	24-Oct-2014	:LogViewerMaster now also may return an error.
-"				Add :LogViewerEnable and :LogViewerDisable.
-"   1.01.004	05-May-2014	Abort on error.
-"   1.00.003	24-Jul-2012	Change LogViewerTarget background highlighting
-"				to LightYellow; the original Orange looks too
-"				similar to my log4j syntax highlighting of WARN
-"				entries.
-"				Turn off 'cursorline' setting for log windows
-"				participating in the sync via a newly introduced
-"				LogviewerSyncWin User autocmd hook.
-"	002	24-Aug-2011	Add commands for setting the master and sync
-"				update method and corresponding configuration.
-"	001	23-Aug-2011	file creation
 
 " Avoid installing twice or when in unsupported Vim version.
 if exists('g:loaded_LogViewer') || (v:version < 700)
