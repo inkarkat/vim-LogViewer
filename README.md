@@ -18,8 +18,8 @@ log window to all other windows. When moving to another line in the current
 window, all log lines that fall in the time range covered by the movement are
 highlighted automatically.
 
-An example screenshot can be found at
-    http://ingo-karkat.de/swdev/vim/LogViewer.png
+This screenshot shows the plugin in action:
+    ![LogViewer](https://raw.githubusercontent.com/inkarkat/vim-LogViewer/master/doc/LogViewer.png)
 
 USAGE
 ------------------------------------------------------------------------------
