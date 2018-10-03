@@ -170,7 +170,7 @@ https://github.com/inkarkat/vim-LogViewer/issues or email (address below).
 HISTORY
 ------------------------------------------------------------------------------
 
-##### 1.11    RELEASEME
+##### 1.11    03-Oct-2018
 - ENH: Keep previous (last accessed) window on :windo.
 - BUG: Movement in visual mode either causes beeps (at first selection) or
   distorts the selection; need to exit visual mode before syncing to be able
