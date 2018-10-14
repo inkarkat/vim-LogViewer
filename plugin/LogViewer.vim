@@ -30,6 +30,24 @@ if ! exists('g:LogViewer_Filetypes')
 endif
 
 
+"- mappings --------------------------------------------------------------------
+
+let s:defaultSync = (g:LogViewer_SyncUpdate ==# 'Manual' ? s:syncUpdates[0] : g:LogViewer_SyncUpdate)
+function! s:Toggle()
+    if g:LogViewer_SyncUpdate ==# s:defaultSync
+	let g:LogViewer_SyncUpdate = 'Manual'
+	echomsg 'LogViewer: Syncing needs manual trigger via :LogViewerTarget now'
+    else
+	let g:LogViewer_SyncUpdate = s:defaultSync
+	echomsg printf('LogViewer: Automatic syncing on %s', g:LogViewer_SyncUpdate)
+    endif
+endfunction
+nnoremap <silent> <Plug>(LogViewerToggle) :<C-u>call <SID>Toggle()<CR>
+if ! hasmapto('<Plug>(LogViewerToggle)', 'n')
+    nmap <Leader>tlv <Plug>(LogViewerToggle)
+endif
+
+
 "- commands --------------------------------------------------------------------
 
 command! -bar LogViewerEnable  let b:LogViewer_Enabled = 1 | if g:LogViewer_SyncAll | call LogViewer#InstallLogLineSync() | endif

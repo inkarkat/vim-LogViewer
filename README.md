@@ -64,6 +64,10 @@ USAGE
                             has to be explicitly triggered with
                             :LogViewerTarget.
 
+    <Leader>tlv             Toggle syncing between the default update trigger
+                            (g:LogViewer_SyncUpdate) and manual updating (or
+                            CursorMoved if the default sync is set to manual).
+
     :LogViewerTarget        Set the target log line (the basis for the
                             highlighting in all other log buffers) to the current
                             line in the current buffer.
@@ -156,6 +160,12 @@ automatically for log windows); you can define you own colors for those, too:
 
     highlight LogViewerTarget gui=underline guibg=Red
 
+If you want to use a different mapping, map your keys to the
+<Plug>(LogViewerToggle) mapping target _before_ sourcing the script (e.g. in
+your vimrc):
+
+    nmap <Leader>LV <Plug>(LogViewerToggle)
+
 IDEAS
 ------------------------------------------------------------------------------
 
@@ -169,6 +179,9 @@ https://github.com/inkarkat/vim-LogViewer/issues or email (address below).
 
 HISTORY
 ------------------------------------------------------------------------------
+
+##### 1.12    RELEASEME
+- ENH: Add <Leader>tlv mapping to quickly enable / disable sync updates.
 
 ##### 1.11    03-Oct-2018
 - ENH: Keep previous (last accessed) window on :windo.
