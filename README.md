@@ -1,4 +1,4 @@
-LOGVIEWER   
+LOGVIEWER
 ===============================================================================
 _by Ingo Karkat_
 
@@ -182,6 +182,10 @@ HISTORY
 
 ##### 1.12    RELEASEME
 - ENH: Add <Leader>tlv mapping to quickly enable / disable sync updates.
+- With Manual updating, don't automatically adapt the signs to show the
+  perspective from the current buffer. The user doesn't expect any change to
+  the displayed situation here, only do this when explicitly triggered via
+  :LogViewerTarget.
 
 ##### 1.11    03-Oct-2018
 - ENH: Keep previous (last accessed) window on :windo.
@@ -193,7 +197,8 @@ HISTORY
   this with a custom value.
 - Use first non-empty line in buffer to detect used log4j timestamp format.
 - Add precise pattern for %d log4j format, and check that first.
-  __You need to update to ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version 1.032!__
+
+__You need to update to ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version 1.032!__
 
 ##### 1.10    29-Oct-2014
 - Syncing on the CursorMoved event disturbs the selection, making it
@@ -204,7 +209,8 @@ HISTORY
   individual buffers, and allow use of the plugin for filetypes that haven't
   been included in g:LogViewer\_Filetypes.
 - Add dependency to ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)).
-  __You need to separately install ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version
+
+__You need to separately install ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version
   1.008 (or higher)!__
 
 ##### 1.00    01-Aug-2012
@@ -214,7 +220,7 @@ HISTORY
 - Started development.
 
 ------------------------------------------------------------------------------
-Copyright: (C) 2011-2018 Ingo Karkat -
+Copyright: (C) 2011-2019 Ingo Karkat -
 The [VIM LICENSE](http://vimdoc.sourceforge.net/htmldoc/uganda.html#license) applies to this plugin.
 
 Maintainer:     Ingo Karkat <ingo@karkat.de>

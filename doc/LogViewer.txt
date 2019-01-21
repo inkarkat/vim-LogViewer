@@ -199,6 +199,10 @@ HISTORY							   *LogViewer-history*
 
 1.12	RELEASEME
 - ENH: Add <Leader>tlv mapping to quickly enable / disable sync updates.
+- With Manual updating, don't automatically adapt the signs to show the
+  perspective from the current buffer. The user doesn't expect any change to
+  the displayed situation here, only do this when explicitly triggered via
+  :LogViewerTarget.
 
 1.11	03-Oct-2018
 - ENH: Keep previous (last accessed) window on :windo.
@@ -231,7 +235,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2018 Ingo Karkat
+Copyright: (C) 2011-2019 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
