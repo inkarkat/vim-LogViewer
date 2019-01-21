@@ -3,9 +3,9 @@
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher.
 "   - LogViewer.vim autoload script
-"   - ingo/err.vim autoload script
+"   - ingo-library.vim plugin
 "
-" Copyright: (C) 2011-2018 Ingo Karkat
+" Copyright: (C) 2011-2019 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -50,7 +50,7 @@ endif
 
 "- commands --------------------------------------------------------------------
 
-command! -bar LogViewerEnable  let b:LogViewer_Enabled = 1 | if g:LogViewer_SyncAll | call LogViewer#InstallLogLineSync() | endif
+command! -bar LogViewerEnable  let b:LogViewer_Enabled = 1 | if g:LogViewer_SyncAll | call LogViewer#InstallLogLineSync() | else | call ingo#event#TriggerCustom('LogViewerEnable') | endif
 command! -bar LogViewerDisable let b:LogViewer_Enabled = 0 | call LogViewer#DeinstallLogLineSync()
 
 " Turn off syncing in all buffers other that the current one.

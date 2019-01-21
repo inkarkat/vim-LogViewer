@@ -340,10 +340,13 @@ function! LogViewer#InstallLogLineSync()
 	autocmd WinEnter <buffer> if ! <SID>HasFixedMaster() && ! <SID>HasManualUpdate() | call LogViewer#MasterEnter() | endif
 	autocmd WinLeave <buffer> if ! <SID>HasFixedMaster() && ! <SID>HasManualUpdate() | call LogViewer#MasterLeave() | endif
     augroup END
+
+    call ingo#event#TriggerCustom('LogViewerEnable')
 endfunction
 function! LogViewer#DeinstallLogLineSync()
     call s:SignClear()
     silent! autocmd! LogViewerSync * <buffer>
+    call ingo#event#TriggerCustom('LogViewerDisable')
 endfunction
 
 function! LogViewer#Master()

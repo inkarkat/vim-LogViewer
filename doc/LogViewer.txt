@@ -177,6 +177,14 @@ your |vimrc|): >
 ==============================================================================
 INTEGRATION					       *LogViewer-integration*
 
+The plugin emits |User| events for each buffer that is considered (or not any
+longer) by the plugin, via two LogViewerEnable and LogViewerDisable events: >
+    augroup LogViewerCustomization
+	autocmd!
+	autocmd User LogViewerEnable  echomsg 'Enabled LogViewer for buffer'
+	autocmd User LogViewerDisable echomsg 'Disabled LogViewer for buffer'
+    augroup END
+<
 ==============================================================================
 LIMITATIONS					       *LogViewer-limitations*
 
@@ -197,12 +205,14 @@ https://github.com/inkarkat/vim-LogViewer/issues or email (address below).
 ==============================================================================
 HISTORY							   *LogViewer-history*
 
-1.12	RELEASEME
+1.20	RELEASEME
 - ENH: Add <Leader>tlv mapping to quickly enable / disable sync updates.
 - With Manual updating, don't automatically adapt the signs to show the
   perspective from the current buffer. The user doesn't expect any change to
   the displayed situation here, only do this when explicitly triggered via
   :LogViewerTarget.
+- ENH: Define user events LogViewerEnable and LogViewerDisable to allow
+  hooking into the plugin functionality.
 
 1.11	03-Oct-2018
 - ENH: Keep previous (last accessed) window on :windo.
