@@ -181,8 +181,8 @@ The plugin emits |User| events for each buffer that is considered (or not any
 longer) by the plugin, via two LogViewerEnable and LogViewerDisable events: >
     augroup LogViewerCustomization
 	autocmd!
-	autocmd User LogViewerEnable  echomsg 'Enabled LogViewer for buffer'
-	autocmd User LogViewerDisable echomsg 'Disabled LogViewer for buffer'
+	autocmd User LogViewerEnable  unsilent echomsg 'Enabled LogViewer for buffer'
+	autocmd User LogViewerDisable unsilent echomsg 'Disabled LogViewer for buffer'
     augroup END
 <
 ==============================================================================

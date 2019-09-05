@@ -161,7 +161,7 @@ automatically for log windows); you can define you own colors for those, too:
     highlight LogViewerTarget gui=underline guibg=Red
 
 If you want to use a different mapping, map your keys to the
-<Plug>(LogViewerToggle) mapping target _before_ sourcing the script (e.g. in
+&lt;Plug&gt;(LogViewerToggle) mapping target _before_ sourcing the script (e.g. in
 your vimrc):
 
     nmap <Leader>LV <Plug>(LogViewerToggle)
@@ -174,8 +174,8 @@ longer) by the plugin, via two LogViewerEnable and LogViewerDisable events:
 
     augroup LogViewerCustomization
         autocmd!
-        autocmd User LogViewerEnable  echomsg 'Enabled LogViewer for buffer'
-        autocmd User LogViewerDisable echomsg 'Disabled LogViewer for buffer'
+        autocmd User LogViewerEnable  unsilent echomsg 'Enabled LogViewer for buffer'
+        autocmd User LogViewerDisable unsilent echomsg 'Disabled LogViewer for buffer'
     augroup END
 
 IDEAS
@@ -193,7 +193,7 @@ HISTORY
 ------------------------------------------------------------------------------
 
 ##### 1.20    RELEASEME
-- ENH: Add <Leader>tlv mapping to quickly enable / disable sync updates.
+- ENH: Add &lt;Leader&gt;tlv mapping to quickly enable / disable sync updates.
 - With Manual updating, don't automatically adapt the signs to show the
   perspective from the current buffer. The user doesn't expect any change to
   the displayed situation here, only do this when explicitly triggered via
@@ -237,4 +237,4 @@ __You need to separately install ingo-library ([vimscript #4433](http://www.vim.
 Copyright: (C) 2011-2019 Ingo Karkat -
 The [VIM LICENSE](http://vimdoc.sourceforge.net/htmldoc/uganda.html#license) applies to this plugin.
 
-Maintainer:     Ingo Karkat <ingo@karkat.de>
+Maintainer:     Ingo Karkat &lt;ingo@karkat.de&gt;
