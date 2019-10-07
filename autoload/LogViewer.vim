@@ -13,7 +13,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! s:GetTimestamp( lnum )
-    let l:logTimestampExpr = (exists('b:logTimestampExpr') ? b:logTimestampExpr : '^\d\+\ze\s')
+    let l:logTimestampExpr = (exists('b:logTimestampExpr') ? b:logTimestampExpr : g:LogViewer_TimestampExpr)
     return matchstr(getline(a:lnum), l:logTimestampExpr)
 endfunction
 

@@ -135,6 +135,8 @@ timestamp pattern corresponding to the "%d" format is:
 
     let b:logTimestampExpr = '^\d\S\+\d \d\S\+\d\ze\s' " %d, e.g. 2011-08-17 13:08:30,509
 
+If most / all of your logfiles have a differing timestamp format, you can
+alternatively just redefine the global default as well.
 To determine the chronological order, LogViewer uses a numerical compare for
 integer timestamps, and case-sensitive string comparison for everything else.
 
@@ -200,6 +202,9 @@ HISTORY
   :LogViewerTarget.
 - ENH: Define user events LogViewerEnable and LogViewerDisable to allow
   hooking into the plugin functionality.
+- ENH: The default extraction pattern for the timestamp can now also be
+  reconfigured globally (via g:LogViewer\_TimestampExpr), not just for
+  individual buffers via b:logTimestampExpr.
 
 ##### 1.11    03-Oct-2018
 - ENH: Keep previous (last accessed) window on :windo.

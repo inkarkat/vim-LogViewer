@@ -28,6 +28,9 @@ endif
 if ! exists('g:LogViewer_Filetypes')
     let g:LogViewer_Filetypes = 'log4j'
 endif
+if ! exists('g:LogViewer_TimestampExpr')
+    let g:LogViewer_TimestampExpr = '^\d\+\ze\s'
+endif
 
 
 "- mappings --------------------------------------------------------------------

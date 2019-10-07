@@ -137,13 +137,15 @@ Only buffers with certain filetypes are considered log files. The setting is a
 comma-separated list of filetypes (|autocmd-patterns|): >
     let g:LogViewer_Filetypes = 'log4j,syslog'
 <
-							  *b:logTimestampExpr*
+			      *g:LogViewer_TimestampExpr* *b:logTimestampExpr*
 By default, the timestamp is expected as a whitespace-separated decimal number
 starting at the first column. You should define the appropriate timestamp
 format for each log filetype (from |g:LogViewer_Filetypes|). Typically, this
 is done in ~/.vim/ftplugin/{filetype}_LogViewer.vim. For example, the log4j
 timestamp pattern corresponding to the "%d" format is: >
     let b:logTimestampExpr = '^\d\S\+\d \d\S\+\d\ze\s' " %d, e.g. 2011-08-17 13:08:30,509
+If most / all of your logfiles have a differing timestamp format, you can
+alternatively just redefine the global default as well.
 To determine the chronological order, LogViewer uses a numerical compare for
 integer timestamps, and case-sensitive string comparison for everything else.
 
@@ -213,6 +215,9 @@ HISTORY							   *LogViewer-history*
   :LogViewerTarget.
 - ENH: Define user events LogViewerEnable and LogViewerDisable to allow
   hooking into the plugin functionality.
+- ENH: The default extraction pattern for the timestamp can now also be
+  reconfigured globally (via g:LogViewer_TimestampExpr), not just for
+  individual buffers via b:logTimestampExpr.
 
 1.11	03-Oct-2018
 - ENH: Keep previous (last accessed) window on :windo.
