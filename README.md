@@ -1,4 +1,4 @@
-LOGVIEWER   
+LOGVIEWER
 ===============================================================================
 _by Ingo Karkat_
 
@@ -63,6 +63,10 @@ USAGE
                             will only happen after 'updatetime'. With Manual, it
                             has to be explicitly triggered with
                             :LogViewerTarget.
+
+    <Leader>tlv             Toggle syncing between the default update trigger
+                            (g:LogViewer_SyncUpdate) and manual updating (or
+                            CursorMoved if the default sync is set to manual).
 
     :LogViewerTarget        Set the target log line (the basis for the
                             highlighting in all other log buffers) to the current
@@ -131,6 +135,8 @@ timestamp pattern corresponding to the "%d" format is:
 
     let b:logTimestampExpr = '^\d\S\+\d \d\S\+\d\ze\s' " %d, e.g. 2011-08-17 13:08:30,509
 
+If most / all of your logfiles have a differing timestamp format, you can
+alternatively just redefine the global default as well.
 To determine the chronological order, LogViewer uses a numerical compare for
 integer timestamps, and case-sensitive string comparison for everything else.
 
@@ -156,6 +162,24 @@ automatically for log windows); you can define you own colors for those, too:
 
     highlight LogViewerTarget gui=underline guibg=Red
 
+If you want to use a different mapping, map your keys to the
+&lt;Plug&gt;(LogViewerToggle) mapping target _before_ sourcing the script (e.g. in
+your vimrc):
+
+    nmap <Leader>LV <Plug>(LogViewerToggle)
+
+INTEGRATION
+------------------------------------------------------------------------------
+
+The plugin emits User events for each buffer that is considered (or not any
+longer) by the plugin, via two LogViewerEnable and LogViewerDisable events:
+
+    augroup LogViewerCustomization
+        autocmd!
+        autocmd User LogViewerEnable  unsilent echomsg 'Enabled LogViewer for buffer'
+        autocmd User LogViewerDisable unsilent echomsg 'Disabled LogViewer for buffer'
+    augroup END
+
 IDEAS
 ------------------------------------------------------------------------------
 
@@ -170,6 +194,18 @@ https://github.com/inkarkat/vim-LogViewer/issues or email (address below).
 HISTORY
 ------------------------------------------------------------------------------
 
+##### 1.20    03-Feb-2020
+- ENH: Add &lt;Leader&gt;tlv mapping to quickly enable / disable sync updates.
+- With Manual updating, don't automatically adapt the signs to show the
+  perspective from the current buffer. The user doesn't expect any change to
+  the displayed situation here, only do this when explicitly triggered via
+  :LogViewerTarget.
+- ENH: Define user events LogViewerEnable and LogViewerDisable to allow
+  hooking into the plugin functionality.
+- ENH: The default extraction pattern for the timestamp can now also be
+  reconfigured globally (via g:LogViewer\_TimestampExpr), not just for
+  individual buffers via b:logTimestampExpr.
+
 ##### 1.11    03-Oct-2018
 - ENH: Keep previous (last accessed) window on :windo.
 - BUG: Movement in visual mode either causes beeps (at first selection) or
@@ -180,7 +216,8 @@ HISTORY
   this with a custom value.
 - Use first non-empty line in buffer to detect used log4j timestamp format.
 - Add precise pattern for %d log4j format, and check that first.
-  __You need to update to ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version 1.032!__
+
+__You need to update to ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version 1.032!__
 
 ##### 1.10    29-Oct-2014
 - Syncing on the CursorMoved event disturbs the selection, making it
@@ -191,7 +228,8 @@ HISTORY
   individual buffers, and allow use of the plugin for filetypes that haven't
   been included in g:LogViewer\_Filetypes.
 - Add dependency to ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)).
-  __You need to separately install ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version
+
+__You need to separately install ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version
   1.008 (or higher)!__
 
 ##### 1.00    01-Aug-2012
@@ -201,7 +239,7 @@ HISTORY
 - Started development.
 
 ------------------------------------------------------------------------------
-Copyright: (C) 2011-2018 Ingo Karkat -
+Copyright: (C) 2011-2020 Ingo Karkat -
 The [VIM LICENSE](http://vimdoc.sourceforge.net/htmldoc/uganda.html#license) applies to this plugin.
 
-Maintainer:     Ingo Karkat <ingo@karkat.de>
+Maintainer:     Ingo Karkat &lt;ingo@karkat.de&gt;

@@ -5,7 +5,7 @@
 "   - ingo/err.vim autoload script
 "   - ingo/event.vim autoload script
 
-" Copyright: (C) 2011-2018 Ingo Karkat
+" Copyright: (C) 2011-2019 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -13,7 +13,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! s:GetTimestamp( lnum )
-    let l:logTimestampExpr = (exists('b:logTimestampExpr') ? b:logTimestampExpr : '^\d\+\ze\s')
+    let l:logTimestampExpr = (exists('b:logTimestampExpr') ? b:logTimestampExpr : g:LogViewer_TimestampExpr)
     return matchstr(getline(a:lnum), l:logTimestampExpr)
 endfunction
 
@@ -317,6 +317,9 @@ endfunction
 function! s:HasFixedMaster()
     return (s:masterBufnr != -1)
 endfunction
+function! s:HasManualUpdate()
+    return g:LogViewer_SyncUpdate ==# 'Manual'
+endfunction
 function! LogViewer#InstallLogLineSync()
     " Sync the current log line via the timestamp to the cursor positions in all
     " other open log windows. Do this now and update when the cursor isn't
@@ -334,13 +337,16 @@ function! LogViewer#InstallLogLineSync()
 	autocmd CursorHold  <buffer> if <SID>IsMaster() | call LogViewer#LineSync('CursorHold')  | endif
 
 	" Handle change of master buffer containing the target timestamp.
-	autocmd WinEnter <buffer> if ! <SID>HasFixedMaster() | call LogViewer#MasterEnter() | endif
-	autocmd WinLeave <buffer> if ! <SID>HasFixedMaster() | call LogViewer#MasterLeave() | endif
+	autocmd WinEnter <buffer> if ! <SID>HasFixedMaster() && ! <SID>HasManualUpdate() | call LogViewer#MasterEnter() | endif
+	autocmd WinLeave <buffer> if ! <SID>HasFixedMaster() && ! <SID>HasManualUpdate() | call LogViewer#MasterLeave() | endif
     augroup END
+
+    call ingo#event#TriggerCustom('LogViewerEnable')
 endfunction
 function! LogViewer#DeinstallLogLineSync()
     call s:SignClear()
     silent! autocmd! LogViewerSync * <buffer>
+    call ingo#event#TriggerCustom('LogViewerDisable')
 endfunction
 
 function! LogViewer#Master()

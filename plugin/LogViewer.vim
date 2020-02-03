@@ -3,9 +3,9 @@
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher.
 "   - LogViewer.vim autoload script
-"   - ingo/err.vim autoload script
+"   - ingo-library.vim plugin
 "
-" Copyright: (C) 2011-2018 Ingo Karkat
+" Copyright: (C) 2011-2019 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -28,11 +28,32 @@ endif
 if ! exists('g:LogViewer_Filetypes')
     let g:LogViewer_Filetypes = 'log4j'
 endif
+if ! exists('g:LogViewer_TimestampExpr')
+    let g:LogViewer_TimestampExpr = '^\d\+\ze\s'
+endif
+
+
+"- mappings --------------------------------------------------------------------
+
+let s:defaultSync = (g:LogViewer_SyncUpdate ==# 'Manual' ? s:syncUpdates[0] : g:LogViewer_SyncUpdate)
+function! s:Toggle()
+    if g:LogViewer_SyncUpdate ==# s:defaultSync
+	let g:LogViewer_SyncUpdate = 'Manual'
+	echomsg 'LogViewer: Syncing needs manual trigger via :LogViewerTarget now'
+    else
+	let g:LogViewer_SyncUpdate = s:defaultSync
+	echomsg printf('LogViewer: Automatic syncing on %s', g:LogViewer_SyncUpdate)
+    endif
+endfunction
+nnoremap <silent> <Plug>(LogViewerToggle) :<C-u>call <SID>Toggle()<CR>
+if ! hasmapto('<Plug>(LogViewerToggle)', 'n')
+    nmap <Leader>tlv <Plug>(LogViewerToggle)
+endif
 
 
 "- commands --------------------------------------------------------------------
 
-command! -bar LogViewerEnable  let b:LogViewer_Enabled = 1 | if g:LogViewer_SyncAll | call LogViewer#InstallLogLineSync() | endif
+command! -bar LogViewerEnable  let b:LogViewer_Enabled = 1 | if g:LogViewer_SyncAll | call LogViewer#InstallLogLineSync() | else | call ingo#event#TriggerCustom('LogViewerEnable') | endif
 command! -bar LogViewerDisable let b:LogViewer_Enabled = 0 | call LogViewer#DeinstallLogLineSync()
 
 " Turn off syncing in all buffers other that the current one.

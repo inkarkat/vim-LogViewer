@@ -76,6 +76,10 @@ V 2012-08-01 10:01:26.012 ~
 			will only happen after 'updatetime'. With Manual, it
 			has to be explicitly triggered with
 			|:LogViewerTarget|.
+								 *<Leader>tlv*
+<Leader>tlv		Toggle syncing between the default update trigger
+			(|g:LogViewer_SyncUpdate|) and manual updating (or
+			CursorMoved if the default sync is set to manual).
 
 							    *:LogViewerTarget*
 :LogViewerTarget	Set the target log line (the basis for the
@@ -133,13 +137,15 @@ Only buffers with certain filetypes are considered log files. The setting is a
 comma-separated list of filetypes (|autocmd-patterns|): >
     let g:LogViewer_Filetypes = 'log4j,syslog'
 <
-							  *b:logTimestampExpr*
+			      *g:LogViewer_TimestampExpr* *b:logTimestampExpr*
 By default, the timestamp is expected as a whitespace-separated decimal number
 starting at the first column. You should define the appropriate timestamp
 format for each log filetype (from |g:LogViewer_Filetypes|). Typically, this
 is done in ~/.vim/ftplugin/{filetype}_LogViewer.vim. For example, the log4j
 timestamp pattern corresponding to the "%d" format is: >
     let b:logTimestampExpr = '^\d\S\+\d \d\S\+\d\ze\s' " %d, e.g. 2011-08-17 13:08:30,509
+If most / all of your logfiles have a differing timestamp format, you can
+alternatively just redefine the global default as well.
 To determine the chronological order, LogViewer uses a numerical compare for
 integer timestamps, and case-sensitive string comparison for everything else.
 
@@ -164,9 +170,23 @@ indication of the positions (the 'cursorline' setting is disabled
 automatically for log windows); you can define you own colors for those, too: >
     highlight LogViewerTarget gui=underline guibg=Red
 <
+							     *LogViewer-remap*
+If you want to use a different mapping, map your keys to the
+<Plug>(LogViewerToggle) mapping target _before_ sourcing the script (e.g. in
+your |vimrc|): >
+    nmap <Leader>LV <Plug>(LogViewerToggle)
+<
 ==============================================================================
 INTEGRATION					       *LogViewer-integration*
 
+The plugin emits |User| events for each buffer that is considered (or not any
+longer) by the plugin, via two LogViewerEnable and LogViewerDisable events: >
+    augroup LogViewerCustomization
+	autocmd!
+	autocmd User LogViewerEnable  unsilent echomsg 'Enabled LogViewer for buffer'
+	autocmd User LogViewerDisable unsilent echomsg 'Disabled LogViewer for buffer'
+    augroup END
+<
 ==============================================================================
 LIMITATIONS					       *LogViewer-limitations*
 
@@ -186,6 +206,18 @@ https://github.com/inkarkat/vim-LogViewer/issues or email (address below).
 
 ==============================================================================
 HISTORY							   *LogViewer-history*
+
+1.20	03-Feb-2020
+- ENH: Add <Leader>tlv mapping to quickly enable / disable sync updates.
+- With Manual updating, don't automatically adapt the signs to show the
+  perspective from the current buffer. The user doesn't expect any change to
+  the displayed situation here, only do this when explicitly triggered via
+  :LogViewerTarget.
+- ENH: Define user events LogViewerEnable and LogViewerDisable to allow
+  hooking into the plugin functionality.
+- ENH: The default extraction pattern for the timestamp can now also be
+  reconfigured globally (via g:LogViewer_TimestampExpr), not just for
+  individual buffers via b:logTimestampExpr.
 
 1.11	03-Oct-2018
 - ENH: Keep previous (last accessed) window on :windo.
@@ -218,7 +250,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2018 Ingo Karkat
+Copyright: (C) 2011-2020 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
