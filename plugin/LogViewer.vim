@@ -2,16 +2,15 @@
 "
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher.
-"   - LogViewer.vim autoload script
 "   - ingo-library.vim plugin
 "
-" Copyright: (C) 2011-2019 Ingo Karkat
+" Copyright: (C) 2011-2020 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 
 " Avoid installing twice or when in unsupported Vim version.
-if exists('g:loaded_LogViewer') || (v:version < 700)
+if exists('g:loaded_LogViewer') || (v:version < 700) || (! has('signs'))
     finish
 endif
 let g:loaded_LogViewer = 1
