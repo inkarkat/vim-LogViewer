@@ -4,7 +4,7 @@
 "   - Requires Vim 7.0 or higher.
 "   - ingo-library.vim plugin
 "
-" Copyright: (C) 2011-2020 Ingo Karkat
+" Copyright: (C) 2011-2022 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -75,7 +75,13 @@ command! -bar -nargs=1 -complete=customlist,<SID>SyncUpdateComplete LogViewerUpd
 
 " Set target to current line, [count] timestamps down (from the current target
 " timestamp), or the first timestamp that matches {timestamp}.
-command! -bar -range=0 -nargs=? LogViewerTarget if ! LogViewer#SetTarget(<count>, <q-args>) | echoerr ingo#err#Get() | endif
+let s:hasOtherArgumentAddressing = (v:version == 801 && has('patch560') || v:version > 801)
+if s:hasOtherArgumentAddressing
+    command! -bar -addr=other -range=0 -nargs=? LogViewerTarget if ! LogViewer#SetTarget(<count>, <q-args>) | echoerr ingo#err#Get() | endif
+else
+    command! -bar             -range=0 -nargs=? LogViewerTarget if ! LogViewer#SetTarget(<count>, <q-args>) | echoerr ingo#err#Get() | endif
+endif
+unlet s:hasOtherArgumentAddressing
 
 
 "- autocmds --------------------------------------------------------------------
