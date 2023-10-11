@@ -197,6 +197,7 @@ HISTORY
 ##### 1.21    RELEASEME
 - Minor: Allow :[count]LogViewerTarget with a count larger than the number of
   lines in the buffer (in newer Vims).
+- Add javalog\_LogViewer variant for java.util.logging
 
 ##### 1.20    03-Feb-2020
 - ENH: Add &lt;Leader&gt;tlv mapping to quickly enable / disable sync updates.
