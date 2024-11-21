@@ -194,6 +194,11 @@ https://github.com/inkarkat/vim-LogViewer/issues or email (address below).
 HISTORY
 ------------------------------------------------------------------------------
 
+##### 1.21    21-Nov-2024
+- Minor: Allow :[count]LogViewerTarget with a count larger than the number of
+  lines in the buffer (in newer Vims).
+- Add javalog\_LogViewer variant for java.util.logging
+
 ##### 1.20    03-Feb-2020
 - ENH: Add &lt;Leader&gt;tlv mapping to quickly enable / disable sync updates.
 - With Manual updating, don't automatically adapt the signs to show the
@@ -239,7 +244,7 @@ __You need to separately install ingo-library ([vimscript #4433](http://www.vim.
 - Started development.
 
 ------------------------------------------------------------------------------
-Copyright: (C) 2011-2020 Ingo Karkat -
+Copyright: (C) 2011-2024 Ingo Karkat -
 The [VIM LICENSE](http://vimdoc.sourceforge.net/htmldoc/uganda.html#license) applies to this plugin.
 
 Maintainer:     Ingo Karkat &lt;ingo@karkat.de&gt;

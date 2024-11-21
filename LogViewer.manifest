@@ -1,4 +1,5 @@
 autoload/LogViewer.vim
 plugin/LogViewer.vim
+ftplugin/javalog_LogViewer.vim
 ftplugin/log4j_LogViewer.vim
 doc/LogViewer.txt
